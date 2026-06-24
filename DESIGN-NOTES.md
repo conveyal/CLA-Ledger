@@ -93,10 +93,13 @@ PR's file content via the API. It does not check out or execute PR code.
 
 ## 7. Minimal data; privacy defers to CSA's notice
 
-The only personal data recorded is the contributor's GitHub login and numeric
-account ID (both already public); the record also notes the CLA version, date,
-and signing PR. Retention is for the life of the (perpetual, irrevocable) grant,
-as evidence of it.
+The personal data the **signature file** records is the contributor's GitHub
+login and numeric account ID (both already public), plus the CLA version, date,
+and assent; the signing commit and pull request are part of the public
+repository/GitHub history. (Git also stamps each commit with the contributor's
+own self-asserted author name and email — CSA neither requests nor relies on it;
+see `PRIVACY.md`.) Retention is for the life of the (perpetual, irrevocable)
+grant, as evidence of it.
 
 - `PRIVACY.md` here is a *processing-specific* addendum; CSA's overall privacy
   practices, contributor rights, and contact details are in the **CSA Privacy

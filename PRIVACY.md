@@ -35,13 +35,17 @@ Because this is a public repository, your signature record is public and may be
 cloned, mirrored, indexed, or cached by others. We publish it deliberately, as a
 transparent record of who has agreed to the CLA.
 
-Separately, git stamps **every commit with the author name and email your local
-git is configured with — including the commit that adds your signature file
-here.** That author identity becomes part of this repository's public history (and
-of any project you commit to). You set it; CSA does not require it or treat it as
-a signature field, and it may be your real name and email. If you would rather not
-expose those, configure git with a chosen name and a private or GitHub-provided
-`…@users.noreply.github.com` address **before** committing.
+Separately, git stamps every commit with the author name and email your local git
+is configured with — including the commit that adds your signature file. CSA does
+not ask you to provide a legal name or email in the signature file, does not
+verify commit author name or email, and does not rely on them for CLA identity.
+The identity that matters for signing is the authenticated GitHub account that
+opens the pull request: its login and numeric account ID. Commit author fields
+are self-asserted metadata controlled by the contributor. Because this repository
+is public, whatever name and email you put there become part of the permanent
+public history. If you would rather not publish a real name or email, configure
+git with a chosen name and a private or GitHub-provided
+`…@users.noreply.github.com` address before committing.
 
 ## Why, and how long we keep it
 

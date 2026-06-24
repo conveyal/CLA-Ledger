@@ -58,8 +58,10 @@ safety, per-project coverage, and more — so they aren't repeatedly re-litigate
 
 ## Do not
 
-- Do not commit anyone's legal name, email, or employer into this repo. The
-  signing flow intentionally records only the GitHub account; keep it that
-  way.
+- Do not put anyone's legal name, email, or employer in signature-file contents,
+  agreement docs, or helper-generated fields. Git commit metadata is separate,
+  self-asserted contributor-controlled data; remind contributors who do not want
+  to publish a real name or email to use a chosen name and a GitHub
+  noreply/private email before committing.
 - Do not rewrite git history here — it is the integrity record for the
   signatures.

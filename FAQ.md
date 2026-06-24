@@ -126,9 +126,13 @@ Your GitHub **username and numeric account ID**, a link to your signing
 action, and the date. We record the numeric ID on purpose: usernames can be
 changed, so the numeric ID is the stable identity of record. Your username and
 your participation are already public once you contribute to a public repo; the
-numeric ID is GitHub-assigned metadata visible via GitHub's API. We don't
-collect your legal name, email, or employer. The record is published in the
-public CLA-Ledger — see the [Privacy Notice](PRIVACY.md).
+numeric ID is GitHub-assigned metadata visible via GitHub's API. The
+**signature file** doesn't record your legal name, email, or employer — but git
+stamps your own configured author name and email into the commit, which is public
+in this repository's history. CSA neither asks for nor uses it. The record is
+published in the public CLA-Ledger — see the [Privacy Notice](PRIVACY.md), which
+explains how to use a noreply address if you'd rather not publish a real name or
+email.
 
 ### What if I don't want to sign?
 

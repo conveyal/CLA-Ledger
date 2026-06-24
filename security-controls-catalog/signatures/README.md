@@ -77,7 +77,9 @@ your file is the full CLA text followed by precisely this block.
 
 Only your **GitHub login** and **numeric account ID** identify you (plus the CLA
 version, the project, and the date). The numeric ID is the identity of record
-because GitHub logins can change; the ID does not. No legal name, email, or
-employer is required or collected. Identity is taken from the **authenticated
-account that opens the signature pull request** — not from git commit author
-metadata.
+because GitHub logins can change; the ID does not. The **signature file** does
+not record your legal name, email, or employer. Identity is taken from the
+**authenticated account that opens the signature pull request** — not from git
+commit author metadata; note, though, that git stamps your own configured author
+name and email into the commit, which is public in repository history (CSA
+neither requests nor relies on it — see [`PRIVACY.md`](../../PRIVACY.md)).

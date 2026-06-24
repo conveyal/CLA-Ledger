@@ -53,13 +53,14 @@ CLA lives where the work does, rather than in a separate system:
   agreement and your "I agree," submitted through a pull request opened from your authenticated GitHub
   account, is strong, self-contained, timestamped evidence — and the git history
   is tamper-evident.
-- **Minimal, already-public data.** The only *identity* fields we record are
-  your GitHub **login** and **numeric account ID** — no legal name, email, or
-  employer. (The numeric ID is recorded because logins can be renamed; the ID
-  can't.) These are already public the moment you contribute to a public repo.
-  (The signature file also notes the CLA version and the date; the public
-  repository history records the commit, and GitHub records the associated pull
-  request metadata.)
+- **Minimal, already-public data.** The only *identity* fields the **signature
+  file** records are your GitHub **login** and **numeric account ID** — not your
+  legal name, email, or employer. (The numeric ID is recorded because logins can
+  be renamed; the ID can't.) These are already public the moment you contribute
+  to a public repo. (The signature file also notes the CLA version and the date;
+  the public repository history records the commit — including the author name
+  and email your own git is configured with — and GitHub records the associated
+  pull request metadata. See [`PRIVACY.md`](PRIVACY.md).)
 - **Sign once per project.** Your signature is keyed to the *project* you're
   contributing to — an explicit agreement to contribute to that specific work.
   Contributing to another CSA project later means signing that project's CLA
