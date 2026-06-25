@@ -152,10 +152,12 @@ Each file embeds the **full text of the CLA version signed** plus a short
 signature block recording the contributor's **GitHub login** and **numeric
 account ID**, the CLA version, and the date. The numeric ID is recorded because
 logins can change. The **signature file** records no legal name, email, or
-employer; git commit metadata is separate (see [`PRIVACY.md`](PRIVACY.md)). A check validates that file against the **authenticated account that
-opens the PR** (not git commit-author metadata): the filename and the login/ID
-in the file must match that account, and the embedded CLA text must match the
-published version verbatim.
+employer; git commit metadata is separate (see [`PRIVACY.md`](PRIVACY.md)).
+
+A check validates that file against the **authenticated account that opens the
+PR** (not git commit-author metadata): the filename and the login/ID in the file
+must match that account, and the embedded CLA text must match the published
+version verbatim.
 
 ## Adding a project
 
