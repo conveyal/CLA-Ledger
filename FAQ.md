@@ -111,7 +111,9 @@ so people who only contributed ideas aren't co-authors and don't sign. The
 person recorded as the commit's author signs, and by signing represents they
 have the right to submit the whole thing. If several people genuinely co-wrote
 the *text*, each signs (or you flag the part that isn't yours, per the CLA).
-Only use `Co-authored-by:` for real co-authors who have also signed.
+Use `Co-authored-by:` for human co-authors, who each also sign. An AI assistant
+may be acknowledged in a trailer for transparency, but is not a CLA co-author and
+does not sign — you remain responsible for the AI-assisted content.
 
 ### Can I use AI assistance?
 
