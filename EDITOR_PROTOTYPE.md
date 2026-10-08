@@ -19,6 +19,13 @@ accepted signatures in the public Conveyal ledger.
   the production signature validator passed.
 - The account has repository write access. Outsider forking remains unverified.
 - Contributor workflows can opt into personalized individual editor links.
+- [Test contribution PR #2](https://github.com/conveyal/cla-test/pull/2)
+  correctly fails coverage while the signature is unmerged. Its bot comment
+  supplies a personalized link containing the exact complete fixture, and its
+  `Conveyal CLA` check is attached to the contribution's head commit.
+- Fresh workflow dispatch also publishes checks on each PR's head commit:
+  the signature-only PR passes, and the unsigned contribution fails. The
+  dispatcher dry run identifies both open PRs from the trusted project list.
 
 The compact test fixture produces a 5,212-character URL and reaches GitHub's
 login page successfully. A longer test-only introduction produced a
@@ -71,12 +78,32 @@ If the editor is empty, the content is truncated, or GitHub rejects the URL,
 stop and revisit the signing experience. Keep the existing CLI instructions.
 Do not introduce a hosted signing application without a separate decision.
 
+## Coverage and refresh acceptance test
+
+The test repository uses the reusable coverage implementation and the same
+refresh dispatcher as the public ledger. Since it refreshes only itself, its
+temporary refresh workflow can use the repository's built-in token. This
+tests dispatch behavior without creating an App or accepting a real signature.
+Cross-repository refresh still requires the App described in the setup guide.
+
+1. Leave test contribution PR #2 open and confirm `Conveyal CLA` fails with
+   a signing link for `@trevorgerhardt`.
+2. Review and merge test signature PR #1. Its generated contents and signature
+   validation have already passed; maintainer review remains the acceptance step.
+3. Confirm the signature merge triggers the refresh workflow, which requests a
+   fresh evaluation of PR #2 without another contribution commit.
+4. Confirm `Conveyal CLA` passes on the same PR #2 head commit and the existing
+   bot comment changes to report accepted coverage.
+
+Do not merge the contribution PR before verifying this transition. The test
+signature's explicit test-only notice keeps this exercise out of the public ledger.
+
 ## Subsequent work
 
 Personalized contributor comments, the shared PR-head CLA check, and fresh
-dispatch support are implemented. Configure the Conveyal-owned refresh App and accepted-record workflow,
-exercise automatic rechecking, publish tooling release `v0.0.1`, and use that
-release in the R5 pilot. R5's default branch is `dev`.
+dispatch support are implemented. Complete the refresh acceptance test,
+configure the Conveyal-owned refresh App, publish tooling release `v0.0.1`,
+and use that release in the R5 pilot. R5's default branch is `dev`.
 
 The refresh App will need Actions write and Pull requests read on R5. Its
 private key belongs in CLA-Ledger's Actions secrets; the R5 workflow will use
