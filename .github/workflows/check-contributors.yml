@@ -1,12 +1,16 @@
-name: Reusable CLA signature validation
+name: Reusable CLA contributor check
 
 on:
   workflow_call:
     inputs:
-      cla_root:
+      ledger_repository:
         required: false
         type: string
-        default: .
+        default: conveyal/CLA-Ledger
+      ledger_data_ref:
+        required: false
+        type: string
+        default: main
       implementation_repository:
         required: false
         type: string
@@ -14,20 +18,38 @@ on:
       implementation_ref:
         required: true
         type: string
+      signing_url:
+        required: true
+        type: string
+      signature_path_prefix:
+        required: false
+        type: string
+        default: signatures/
+      signature_only_pr:
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
   pull-requests: write
 
 jobs:
-  validate:
-    name: Validate signature
+  check:
+    name: Check contributor coverage
     runs-on: ubuntu-latest
     steps:
       - name: Check out trusted caller base
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+      - name: Check out trusted CLA ledger data
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ${{ inputs.ledger_repository }}
+          ref: ${{ inputs.ledger_data_ref }}
+          path: .cla-ledger-data
           persist-credentials: false
       - name: Check out pinned CLA implementation
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -40,15 +62,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Validate signature records
+      - name: Check contributor coverage
         env:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
-          AUTHOR: ${{ github.event.pull_request.user.login }}
-          AUTHOR_ID: ${{ github.event.pull_request.user.id }}
-          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          CLA_ROOT: ${{ inputs.cla_root }}
-        run: node .cla-ledger/.github/scripts/validate_signatures.ts
+          CLA_ROOT: .cla-ledger-data
+          SIGNATURE_PATH_PREFIX: ${{ inputs.signature_path_prefix }}
+          SIGNATURE_ONLY_PR: ${{ inputs.signature_only_pr }}
+          SIGNING_URL: ${{ inputs.signing_url }}
+        run: node .cla-ledger/.github/scripts/check_cla.ts

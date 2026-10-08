@@ -1,24 +1,24 @@
-# CODEOWNERS — CSA CLA-Ledger
+# CODEOWNERS — Conveyal CLA ledger
 #
 # This repository holds legal agreements and signature records. Human changes
 # to the agreement texts and policies require owner review. Pair with branch
 # protection that requires CODEOWNER review on pull requests.
 
 # Default: all human changes reviewed by ledger owners.
-*                                   @kurtseifried
+*                                   @conveyal/core
 
 # Agreement texts, governance, privacy, and license — highest scrutiny.
-/security-controls-catalog/CLA.md   @kurtseifried
-/STANDARD-LICENSE.md                @kurtseifried
-/GOVERNANCE.md                      @kurtseifried
-/PRIVACY.md                         @kurtseifried
-/LICENSE                            @kurtseifried
+/CLA.md                             @conveyal/core
+/GOVERNANCE.md                      @conveyal/core
+/PRIVACY.md                         @conveyal/core
+/LICENSE                            @conveyal/core
+/cla/                               @conveyal/core
+/versions/                          @conveyal/core
+/signatures/                        @conveyal/core
+/.github/workflows/cla.yml          @conveyal/core
 
-# NOTE: signature files under <project>/signatures/ (e.g.
-# security-controls-catalog/signatures/) are contributor-submitted via pull
-# request. validate-signature.yml checks each one automatically (PR-opener
-# identity, required fields, verbatim CLA text); a ledger owner then reviews and
-# MERGES it, which is CSA's acceptance of the signature (see each project's CLA,
-# "Execution and Identity"). The catch-all above intentionally covers signature
-# PRs too — owner review of them is the acceptance/vetting step, not an obstacle
-# to it.
+# NOTE: signature files are contributor-submitted via pull request.
+# validate-signature.yml checks opener identity, required fields, and verbatim
+# CLA text; a Conveyal maintainer then reviews and merges the record. The
+# catch-all intentionally covers signature PRs too: review and merge are the
+# acceptance step.

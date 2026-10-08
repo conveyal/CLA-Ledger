@@ -1,0 +1,38 @@
+name: CLA
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  signature:
+    name: Validate signature
+    # The base SHA is immutable and ensures a signature PR cannot change the
+    # validator that evaluates itself.
+    uses: ./.github/workflows/validate-signature.yml
+    with:
+      cla_root: .
+      implementation_repository: conveyal/CLA-Ledger
+      implementation_ref: ${{ github.event.pull_request.base.sha }}
+    permissions:
+      contents: read
+      pull-requests: write
+
+  check:
+    name: Check contributor coverage
+    uses: ./.github/workflows/check-contributors.yml
+    with:
+      ledger_repository: conveyal/CLA-Ledger
+      ledger_data_ref: ${{ github.event.pull_request.base.sha }}
+      implementation_repository: conveyal/CLA-Ledger
+      implementation_ref: ${{ github.event.pull_request.base.sha }}
+      signature_path_prefix: signatures/
+      signature_only_pr: true
+      signing_url: https://github.com/conveyal/CLA-Ledger/blob/main/CLA.md
+    permissions:
+      contents: read
+      pull-requests: write

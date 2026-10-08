@@ -1,12 +1,9 @@
-# Local Claude Code / tooling context — never publish
-.claude/
-
 # OS / editor cruft
 .DS_Store
 ._*
 *.swp
 Thumbs.db
 
-# Python (validation script bytecode)
-__pycache__/
-*.pyc
+# Node.js local tooling
+.node_repl_history
+node_modules/
