@@ -623,7 +623,8 @@ test("workflow wiring binds the trusted base and run head with separate ledger d
   const reusable = fs.readFileSync(path.join(repositoryRoot, ".github/workflows/check-contributors.yml"), "utf8");
   const signature = fs.readFileSync(path.join(repositoryRoot, ".github/workflows/validate-signature.yml"), "utf8");
   for (const workflow of [reusable, signature]) {
-    assert.match(workflow, /node-version: 24/);
+    assert.match(workflow, /uses: pnpm\/setup@v3/);
+    assert.match(workflow, /working-directory: \.cla-ledger\n\s+install: false/);
     assert.match(workflow, /ref: \$\{\{ github\.event\.pull_request\.base\.sha \}\}/);
     assert.match(workflow, /HEAD_SHA: \$\{\{ github\.event\.pull_request\.head\.sha \}\}/);
     assert.match(workflow, /BASE_SHA: \$\{\{ github\.event\.pull_request\.base\.sha \}\}/);

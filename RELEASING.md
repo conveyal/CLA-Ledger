@@ -48,12 +48,12 @@ git switch main
 git pull --ff-only origin main
 ```
 
-Run the implementation checks with Node.js 24.2 or newer:
+Run the implementation checks with the pnpm version and Node.js 24 runtime declared in `package.json`:
 
 ```sh
-npm ci
-npm run typecheck
-npm test
+pnpm install --frozen-lockfile
+pnpm typecheck
+pnpm test
 ```
 
 Review changes to the reusable workflow inputs, signature validation,

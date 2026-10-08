@@ -14,16 +14,21 @@ The helper and workflow scripts require Node.js 24.2 or newer and use only Node'
 built-in modules. No npm install or TypeScript compiler is required; run them
 directly with `node path/to/script.ts`.
 
-For local development, install the type-checking dependencies with `npm ci`.
-Run `npm run typecheck` to check the scripts with TypeScript. This
+For local development, use the pnpm version and Node.js 24 runtime declared in
+`package.json`. Install the type-checking dependencies with `pnpm install --frozen-lockfile`.
+Run `pnpm typecheck` to check the scripts with TypeScript. This
 [no-output check](https://www.typescriptlang.org/tsconfig/noEmit.html) adds no
 build step to signing or workflow execution.
 
 Run the offline test suite with:
 
 ```sh
-node --test .github/scripts/test_cla.ts
+pnpm test
 ```
+
+The [test workflow](.github/workflows/test.yml) runs type checking and tests on
+pull requests and pushes to `main`. It sets up pnpm and Node.js from
+`package.json` with `pnpm/setup` and installs dependencies from the lockfile.
 
 ## Design
 

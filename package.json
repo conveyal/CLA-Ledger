@@ -2,6 +2,14 @@
   "name": "conveyal-cla-ledger",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@12.9.1",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^24.2.0",
+      "onFail": "download"
+    }
+  },
   "scripts": {
     "test": "node --test .github/scripts/test_cla.ts",
     "typecheck": "tsc"

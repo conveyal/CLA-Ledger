@@ -82,7 +82,7 @@ Verify that the repository and organization policies permit these dependencies:
 
 - `conveyal/CLA-Ledger/.github/workflows/check-contributors.yml` at the selected release tag
 - `actions/checkout` at the ref used by the selected implementation
-- `actions/setup-node` at the ref used by the selected implementation
+- `pnpm/setup` at the ref used by the selected implementation
 
 The caller requests `contents: read` and `pull-requests: write` through the
 built-in `GITHUB_TOKEN`. The current public-ledger implementation needs no
