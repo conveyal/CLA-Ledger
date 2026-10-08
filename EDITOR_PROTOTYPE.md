@@ -8,7 +8,7 @@ accepted signatures in the public Conveyal ledger.
 
 ## Current state
 
-- The agreement is `v0.1`. The planned first tooling release is `v0.0.1`.
+- The agreement is `v0.1`. The first tooling release is `v0.0.1`.
 - `sign.ts --editor-url` generates a URL without creating a local record.
 - Offline tests check the decoded URL contents against the canonical record
   and the production signature validator.
@@ -26,6 +26,12 @@ accepted signatures in the public Conveyal ledger.
 - Fresh workflow dispatch also publishes checks on each PR's head commit:
   the signature-only PR passes, and the unsigned contribution fails. The
   dispatcher dry run identifies both open PRs from the trusted project list.
+- Maintainer acceptance and automatic refresh passed on 2026-10-08. Merging
+  PR #1 triggered the [fixture refresh](https://github.com/conveyal/cla-test/actions/runs/37749209081),
+  which dispatched a [fresh successful evaluation](https://github.com/conveyal/cla-test/actions/runs/37749232478)
+  of PR #2 on its unchanged head `8d5006670680eff45cef736d28b06584c68f552f`.
+  The existing bot comment was updated to report coverage; no duplicate
+  signing comment was created.
 
 The compact test fixture produces a 5,212-character URL and reaches GitHub's
 login page successfully. A longer test-only introduction produced a
@@ -101,9 +107,9 @@ signature's explicit test-only notice keeps this exercise out of the public ledg
 ## Subsequent work
 
 Personalized contributor comments, the shared PR-head CLA check, and fresh
-dispatch support are implemented. Complete the refresh acceptance test,
-configure the Conveyal-owned refresh App, publish tooling release `v0.0.1`,
-and use that release in the R5 pilot. R5's default branch is `dev`.
+dispatch support passed the disposable acceptance test. Configure the
+Conveyal-owned refresh App, repeat signing with an account without write access,
+and use tooling release `v0.0.1` in the R5 pilot. R5's default branch is `dev`.
 
 The refresh App will need Actions write and Pull requests read on R5. Its
 private key belongs in CLA-Ledger's Actions secrets; the R5 workflow will use
