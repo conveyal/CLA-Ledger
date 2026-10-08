@@ -40,19 +40,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out trusted caller base
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           persist-credentials: false
       - name: Check out trusted CLA ledger data
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v7
         with:
           repository: ${{ inputs.ledger_repository }}
           ref: ${{ inputs.ledger_data_ref }}
           path: .cla-ledger-data
           persist-credentials: false
       - name: Check out pinned CLA implementation
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v7
         with:
           repository: ${{ inputs.implementation_repository }}
           ref: ${{ inputs.implementation_ref }}
