@@ -118,3 +118,18 @@ private key belongs in CLA-Ledger's Actions secrets; the R5 workflow will use
 its own built-in token to publish comments and checks. Maintainer review
 remains the acceptance step for real signature PRs. See [SETUP_PROJECT.md](SETUP_PROJECT.md)
 for the exact App variables, secret, permissions, and rollout steps.
+
+The central App dry run passed on 2026-10-08: it minted a token scoped to
+`cla-test`, read its open PRs, and selected PR #2 for refresh. See the
+[App dry-run result](https://github.com/conveyal/CLA-Ledger/actions/runs/37752329769).
+The [actual central refresh](https://github.com/conveyal/CLA-Ledger/actions/runs/37752444836)
+also passed and dispatched a [successful v0.0.1 consumer evaluation](https://github.com/conveyal/cla-test/actions/runs/37752472944).
+The PR-head `Conveyal CLA` check and the existing coverage comment remained
+successful without changing the contribution commit.
+R5's release-pinned integration is prepared in
+[PR #1020](https://github.com/conveyal/r5/pull/1020), and its existing Java CI
+and CodeQL checks passed. The PR is ready for review; the `dev` branch requires
+one approving review. R5 enrollment remains disabled until the caller
+is deployed on `dev` and App access is verified. The fork-and-sign browser
+test is deferred until a suitable external account is available; retain the
+manual signing path and complete the test before making the R5 check required.
