@@ -8,7 +8,9 @@ accepted signatures in the public Conveyal ledger.
 
 ## Current state
 
-- The agreement is `v0.1`. The first tooling release is `v0.0.1`.
+- The agreement is `v0.1`. Tooling release
+  [v0.0.1](https://github.com/conveyal/CLA-Ledger/releases/tag/v0.0.1)
+  is published and immutable. The fixture workflows now use that release.
 - `sign.ts --editor-url` generates a URL without creating a local record.
 - Offline tests check the decoded URL contents against the canonical record
   and the production signature validator.
@@ -20,7 +22,7 @@ accepted signatures in the public Conveyal ledger.
 - The account has repository write access. Outsider forking remains unverified.
 - Contributor workflows can opt into personalized individual editor links.
 - [Test contribution PR #2](https://github.com/conveyal/cla-test/pull/2)
-  correctly fails coverage while the signature is unmerged. Its bot comment
+  initially failed coverage while the signature was unmerged. Its bot comment
   supplies a personalized link containing the exact complete fixture, and its
   `Conveyal CLA` check is attached to the contribution's head commit.
 - Fresh workflow dispatch also publishes checks on each PR's head commit:
