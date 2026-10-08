@@ -372,18 +372,19 @@ function records(root: string, version: string): Set<string> {
   return covered;
 }
 
-/** Replaces the first marker comment, or posts one when no marker exists. API errors propagate. */
-async function updateComment(repo: string, pr: string, body: string) {
+/** Replaces the workflow's marker comment; success can avoid creating a new comment. */
+async function updateComment(repo: string, pr: string, body: string, create = true) {
   // The hidden marker keeps repeated failures in one identifiable comment.
   const marker = "<!-- conveyal-cla-check -->";
   const payload = { body: `${marker}\n${body}` };
   const comments = await pages(`/repos/${repo}/issues/${pr}/comments`);
   const existing = comments.find((item): item is { id: number; body: string } => isObject(item)
-    && typeof item.id === "number" && typeof item.body === "string" && item.body.includes(marker));
+    && typeof item.id === "number" && typeof item.body === "string" && item.body.includes(marker)
+    && isObject(item.user) && item.user.login === "github-actions[bot]");
   if (existing) {
     return api(`/repos/${repo}/issues/comments/${existing.id}`, "PATCH", payload);
   }
-  return api(`/repos/${repo}/issues/${pr}/comments`, "POST", payload);
+  return create ? api(`/repos/${repo}/issues/${pr}/comments`, "POST", payload) : null;
 }
 
 export {

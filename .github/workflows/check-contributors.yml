@@ -29,28 +29,28 @@ on:
         required: false
         type: boolean
         default: false
+      pr_number:
+        required: false
+        type: string
+        default: ''
+      personalized_signing_links:
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
   pull-requests: write
+  checks: write
 
 jobs:
   check:
     name: Check contributor coverage
     runs-on: ubuntu-latest
+    concurrency:
+      group: cla-${{ github.repository }}-${{ inputs.pr_number || github.event.pull_request.number }}
+      cancel-in-progress: true
     steps:
-      - name: Check out trusted caller base
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.pull_request.base.sha }}
-          persist-credentials: false
-      - name: Check out trusted CLA ledger data
-        uses: actions/checkout@v7
-        with:
-          repository: ${{ inputs.ledger_repository }}
-          ref: ${{ inputs.ledger_data_ref }}
-          path: .cla-ledger-data
-          persist-credentials: false
       - name: Check out pinned CLA implementation
         uses: actions/checkout@v7
         with:
@@ -63,15 +63,42 @@ jobs:
         with:
           working-directory: .cla-ledger
           install: false
-      - name: Check contributor coverage
+      - name: Resolve the current PR and start its CLA check
+        id: pr
         env:
           GH_TOKEN: ${{ github.token }}
-          PR: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR: ${{ inputs.pr_number || github.event.pull_request.number }}
+          EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EVENT_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: node .cla-ledger/.github/scripts/prepare_check.ts
+      - name: Check out trusted caller base
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.pr.outputs.base_sha }}
+          path: .cla-caller-base
+          persist-credentials: false
+      - name: Check out trusted CLA ledger data
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ inputs.ledger_repository }}
+          ref: ${{ inputs.ledger_data_ref }}
+          path: .cla-ledger-data
+          persist-credentials: false
+      - name: Check contributor coverage
+        if: ${{ always() && steps.pr.outputs.check_id != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ inputs.pr_number || github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
+          HEAD_REPO: ${{ steps.pr.outputs.head_repo }}
+          BASE_SHA: ${{ steps.pr.outputs.base_sha }}
+          CHECK_ID: ${{ steps.pr.outputs.check_id }}
+          PREVIOUS_STATUS: ${{ job.status }}
           CLA_ROOT: .cla-ledger-data
           SIGNATURE_PATH_PREFIX: ${{ inputs.signature_path_prefix }}
           SIGNATURE_ONLY_PR: ${{ inputs.signature_only_pr }}
           SIGNING_URL: ${{ inputs.signing_url }}
-        run: node .cla-ledger/.github/scripts/check_cla.ts
+          EDITOR_LINKS: ${{ inputs.personalized_signing_links }}
+        run: node .cla-ledger/.github/scripts/run_check.ts

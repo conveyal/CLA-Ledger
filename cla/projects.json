@@ -1,0 +1,14 @@
+[
+  {
+    "repository": "conveyal/cla-test",
+    "workflow": "coverage.yml",
+    "ref": "main",
+    "enabled": true
+  },
+  {
+    "repository": "conveyal/r5",
+    "workflow": "cla.yml",
+    "ref": "dev",
+    "enabled": false
+  }
+]

@@ -13,6 +13,11 @@ set of GitHub account IDs through a corporate record.
 
 ### How do I sign?
 
+If your contribution's CLA comment has a **Sign the CLA** link beside your
+account, open it, review the complete record in GitHub's editor, commit on a
+new branch, and open the signature PR using that account. A maintainer must
+merge it before the contribution has coverage. Corporate records use the CLI.
+
 Clone `conveyal/CLA-Ledger` and run
 `node sign.ts <your-login> --id <numeric-id> --individual`.
 You may also run `node sign.ts` with no arguments; the helper prompts for

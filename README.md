@@ -68,20 +68,23 @@ available through ledger data at `main` without a tooling release.
 
 The current provisional agreement is `v0.1`; the first tooling release is
 planned as `v0.0.1`. These version numbers are independent. The
-[editor-link prototype](EDITOR_PROTOTYPE.md) describes the disposable browser
-test that must pass before personalized signing links are enabled.
+[editor-link prototype](EDITOR_PROTOTYPE.md) records the successful maintainer
+browser test and the remaining outsider-fork test. Consumers can enable
+individual signing links with `personalized_signing_links: true`.
 
 To add another repository, copy the caller workflow and change only its
-repository-specific signing link if needed. No central enrollment file is
-required.
+repository-specific signing link if needed. Coverage checking needs no central
+enrollment. Automatic refresh additionally requires an entry in
+`cla/projects.json` and the scoped GitHub App described in [SETUP_PROJECT.md](SETUP_PROJECT.md).
 
 Checks verify that GitHub returned every changed file and commit, and that the
 PR head and base stayed unchanged during validation. GitHub's PR APIs cap
 commit listings at 250 and file listings at 3,000. Checks fail closed when a
 required list exceeds those limits or is incomplete. Split oversized PRs into
 smaller changes. If the PR changed during validation, update the PR branch to
-trigger a fresh workflow run; rerunning an old event retains its old head and
-base references.
+trigger a fresh workflow run, or dispatch the CLA workflow with the PR number.
+Both paths publish the same **Conveyal CLA** check on the evaluated head commit.
+Refresh dispatches resolve current revisions instead of replaying old events.
 
 ## Attribution
 

@@ -7,6 +7,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  checks: write
 
 jobs:
   signature:
@@ -33,6 +34,8 @@ jobs:
       signature_path_prefix: signatures/
       signature_only_pr: true
       signing_url: https://github.com/conveyal/CLA-Ledger/blob/main/CLA.md
+      personalized_signing_links: true
     permissions:
       contents: read
       pull-requests: write
+      checks: write

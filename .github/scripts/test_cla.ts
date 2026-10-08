@@ -18,6 +18,9 @@ import * as check from "./check_cla.ts";
 import * as validate from "./validate_signatures.ts";
 import * as sign from "../../sign.ts";
 import { individualRecord, individualEditorUrl } from "./signature_record.ts";
+import * as prepareCheck from "./prepare_check.ts";
+import * as runCheck from "./run_check.ts";
+import * as refreshProjects from "./refresh_projects.ts";
 // Capture repository paths before sandboxed tests switch the process to temporary ledger checkouts.
 const repositoryRoot = process.cwd();
 const script = path.resolve("sign.ts");
@@ -71,7 +74,7 @@ function sandbox(t: TestContext, root: string) {
   const oldCwd = process.cwd();
   const oldEnvironment = { ...process.env };
   process.chdir(root);
-  for (const key of ["CLA_CONFIG", "CLA_PROMPT", "SIGNATURE_PATH_PREFIX"]) delete process.env[key];
+  for (const key of ["CLA_CONFIG", "CLA_PROMPT", "SIGNATURE_PATH_PREFIX", "EVENT_HEAD_SHA", "EVENT_HEAD_REPO", "EDITOR_LINKS"]) delete process.env[key];
   Object.assign(process.env, {
     CLA_ROOT: ".", REPO: "conveyal/CLA-Ledger", PR: "1", AUTHOR: "octocat", AUTHOR_ID: "1",
     HEAD_REPO: "octocat/fork", HEAD_SHA: "head-sha", BASE_SHA: "base-sha",
@@ -586,7 +589,7 @@ test("comment updates replace the existing marker comment", async (t) => {
     requests.push({ url: String(url), method: options.method || "GET", body: options.body });
     if (String(url).includes("/comments?")) {
       return Response.json(new URL(String(url)).searchParams.get("page") === "1"
-        ? [{ id: 7, body: "<!-- conveyal-cla-check -->\nold" }] : []);
+        ? [{ id: 7, body: "<!-- conveyal-cla-check -->\nold", user: { login: "github-actions[bot]" } }] : []);
     }
     return Response.json({});
   });
@@ -686,11 +689,158 @@ test("workflow wiring binds the trusted base and run head with separate ledger d
   for (const workflow of [reusable, signature]) {
     assert.match(workflow, /uses: pnpm\/setup@v3/);
     assert.match(workflow, /working-directory: \.cla-ledger\n\s+install: false/);
-    assert.match(workflow, /ref: \$\{\{ github\.event\.pull_request\.base\.sha \}\}/);
-    assert.match(workflow, /HEAD_SHA: \$\{\{ github\.event\.pull_request\.head\.sha \}\}/);
-    assert.match(workflow, /BASE_SHA: \$\{\{ github\.event\.pull_request\.base\.sha \}\}/);
   }
+  assert.match(signature, /ref: \$\{\{ github\.event\.pull_request\.base\.sha \}\}/);
+  assert.match(signature, /HEAD_SHA: \$\{\{ github\.event\.pull_request\.head\.sha \}\}/);
+  assert.match(signature, /BASE_SHA: \$\{\{ github\.event\.pull_request\.base\.sha \}\}/);
+  assert.match(reusable, /ref: \$\{\{ steps\.pr\.outputs\.base_sha \}\}/);
+  assert.match(reusable, /HEAD_SHA: \$\{\{ steps\.pr\.outputs\.head_sha \}\}/);
+  assert.match(reusable, /BASE_SHA: \$\{\{ steps\.pr\.outputs\.base_sha \}\}/);
   assert.match(reusable, /path: \.cla-ledger-data/);
   assert.match(signature, /HEAD_REPO/);
   assert.doesNotMatch(reusable + signature, /pull_request\.head\.sha.*actions\/checkout/);
+});
+
+test("personalized comments preserve canonical records and stay within their size budget", () => {
+  const root = fixture();
+  const old = process.env.EDITOR_LINKS;
+  process.env.EDITOR_LINKS = "true";
+  try {
+    const settings = { ...config, ledger_blob: "https://github.com/conveyal/cla-test/blob/main" };
+    write(root, "cla/config.json", JSON.stringify(settings));
+    const authors = Array.from({ length: 250 }, (_, i) => ({ login: `user-${i}`, id: String(i + 1) }));
+    const lines = check.signingLines(root, "v0.1", authors, 30000);
+    assert.equal(lines.length, 250);
+    assert.ok(lines.join("\n").length < 60000);
+    assert.ok(lines.some((line) => line.includes("[Sign the CLA]")));
+    assert.ok(lines.some((line) => line.includes("use the signing instructions")));
+    const url = new URL(lines[0].match(/\[Sign the CLA\]\(([^)]+)\)/)?.[1] || "");
+    assert.equal(url.searchParams.get("filename"), individualPath);
+    assert.equal(validate.individualError(url.searchParams.get("value") || "", helpers.canonical(root, "v0.1"), "v0.1", "user-0", "1", helpers.recordLink(settings, "v0.1")), null);
+    write(root, "versions/CLA-v0.1.md", "x".repeat(6000));
+    assert.doesNotMatch(check.signingLines(root, "v0.1", [authors[0]], 60000)[0], /\[Sign the CLA\]/);
+  } finally { if (old === undefined) delete process.env.EDITOR_LINKS; else process.env.EDITOR_LINKS = old; }
+});
+
+test("success comments neither create unsolicited messages nor edit another author's marker", async (t) => {
+  const requests: RecordedRequest[] = [];
+  t.mock.method(global, "fetch", async (url: Parameters<typeof fetch>[0], options: RequestInit = {}) => {
+    requests.push({ url: String(url), method: options.method || "GET", body: options.body });
+    if (String(url).includes("comments?") && new URL(String(url)).searchParams.get("page") === "1") {
+      return Response.json([{ id: 9, body: "<!-- conveyal-cla-check -->", user: { login: "someone-else" } }]);
+    }
+    return Response.json([]);
+  });
+  await helpers.updateComment("conveyal/r5", "1", "covered", false);
+  assert.equal(requests.some((r) => r.method !== "GET"), false);
+});
+
+/** Complete live metadata used to prove that dispatches cannot publish a check for another repository. */
+const liveHead = "a".repeat(40);
+const liveBase = "b".repeat(40);
+function livePR() {
+  return { number: 1, state: "open", head: { sha: liveHead, repo: { full_name: "octocat/fork" } }, base: { sha: liveBase, repo: { full_name: "conveyal/CLA-Ledger" } } };
+}
+
+test("dispatch preparation creates its check on the fresh PR head and uses the fresh trusted base", async (t) => {
+  sandbox(t, fixture());
+  const requests: RecordedRequest[] = [];
+  t.mock.method(global, "fetch", async (url: Parameters<typeof fetch>[0], options: RequestInit = {}) => {
+    requests.push({ url: String(url), method: options.method || "GET", body: options.body });
+    return Response.json(options.method === "POST" ? { id: 12 } : livePR());
+  });
+  assert.deepEqual(await prepareCheck.prepare(), { head_sha: liveHead, base_sha: liveBase, head_repo: "octocat/fork", check_id: "12" });
+  const posted = requests.find((r) => r.method === "POST");
+  assert.ok(posted && typeof posted.body === "string");
+  assert.equal(JSON.parse(posted.body).head_sha, liveHead);
+  assert.equal(JSON.parse(posted.body).name, "Conveyal CLA");
+});
+
+test("closed, foreign, incomplete, and stale-event PRs cannot start a check", async (t) => {
+  for (const change of [
+    { state: "closed" }, { base: { sha: liveBase, repo: { full_name: "someone/else" } } },
+    { head: { sha: "bad", repo: { full_name: "octocat/fork" } } },
+  ]) {
+    await t.test(JSON.stringify(change), async (t) => {
+      sandbox(t, fixture());
+      t.mock.method(global, "fetch", async (_url: Parameters<typeof fetch>[0], options: RequestInit = {}) => {
+        assert.notEqual(options.method, "POST");
+        return Response.json({ ...livePR(), ...change });
+      });
+      await assert.rejects(prepareCheck.prepare, /complete open PR/);
+    });
+  }
+  await t.test("stale event", async (t) => {
+    sandbox(t, fixture());
+    process.env.EVENT_HEAD_SHA = "c".repeat(40);
+    t.mock.method(global, "fetch", async (_url: Parameters<typeof fetch>[0], options: RequestInit = {}) => {
+      assert.notEqual(options.method, "POST"); return Response.json(livePR());
+    });
+    await assert.rejects(prepareCheck.prepare, /head changed/);
+  });
+});
+
+test("the commit-bound reporter completes success and failure on its own check ID", async (t) => {
+  for (const covered of [true, false]) {
+    await t.test(String(covered), async (t) => {
+      const root = fixture(); sandbox(t, root);
+      process.env.CHECK_ID = "12"; process.env.PREVIOUS_STATUS = "success";
+      if (covered) write(root, individualPath, record(root));
+      const { requests } = mockPR(t, { files: [{ filename: "src/main.java", status: "modified" }] });
+      assert.equal(await runCheck.main(), covered ? 0 : 1);
+      const result = requests.find((r) => r.url.endsWith("/check-runs/12"));
+      assert.ok(result && typeof result.body === "string");
+      assert.equal(JSON.parse(result.body).conclusion, covered ? "success" : "failure");
+    });
+  }
+});
+
+test("checkout errors and changing revisions cannot publish a successful check", async (t) => {
+  for (const checkoutFailure of [true, false]) {
+    await t.test(String(checkoutFailure), async (t) => {
+      const root = fixture(); sandbox(t, root); write(root, individualPath, record(root));
+      process.env.CHECK_ID = "12"; process.env.PREVIOUS_STATUS = checkoutFailure ? "failure" : "success";
+      const { requests } = mockPR(t, { latestMetadata: { head: { sha: "different", repo: { full_name: "octocat/fork" } }, base: { sha: "base-sha" }, commits: 1, changed_files: 1 } });
+      assert.equal(await runCheck.main(), 1);
+      const result = requests.find((r) => r.url.endsWith("/check-runs/12"));
+      assert.ok(result && typeof result.body === "string");
+      assert.equal(JSON.parse(result.body).conclusion, "failure");
+    });
+  }
+});
+
+test("refresh configuration refuses unknown destinations, malformed refs, and duplicates", () => {
+  const project = { repository: "conveyal/r5", workflow: "cla.yml", ref: "dev", enabled: true };
+  assert.deepEqual(refreshProjects.projects([project]), [project]);
+  for (const bad of [null, [project, project], [{ ...project, repository: "other/r5" }], [{ ...project, workflow: "../../file.yml" }], [{ ...project, ref: "dev\nother" }], [{ ...project, enabled: "true" }]]) {
+    assert.throws(() => refreshProjects.projects(bad));
+  }
+});
+
+test("refresh paginates open PRs and dispatches only the configured workflow and branch", async (t) => {
+  const requests: RecordedRequest[] = [];
+  t.mock.method(global, "fetch", async (url: Parameters<typeof fetch>[0], options: RequestInit = {}) => {
+    requests.push({ url: String(url), method: options.method || "GET", body: options.body });
+    if (options.method === "POST") return new Response(null, { status: 204 });
+    return Response.json(new URL(String(url)).searchParams.get("page") === "1" ? [{ number: 1, state: "open" }, { number: 2, state: "open" }] : []);
+  });
+  const project = { repository: "conveyal/r5", workflow: "cla.yml", ref: "dev", enabled: true };
+  assert.equal(await refreshProjects.refresh(project), 2);
+  const posts = requests.filter((r) => r.method === "POST");
+  assert.equal(posts.length, 2);
+  assert.ok(posts.every((r) => r.url.endsWith("/actions/workflows/cla.yml/dispatches")));
+  assert.deepEqual(posts.map((r) => JSON.parse(String(r.body))), [{ ref: "dev", inputs: { pr_number: "1" } }, { ref: "dev", inputs: { pr_number: "2" } }]);
+  requests.length = 0;
+  await refreshProjects.refresh(project, true);
+  assert.equal(requests.some((r) => r.method === "POST"), false);
+});
+
+test("invalid refresh listings cause no partial dispatch", async (t) => {
+  let writes = 0;
+  t.mock.method(global, "fetch", async (url: Parameters<typeof fetch>[0], options: RequestInit = {}) => {
+    if (options.method === "POST") writes++;
+    return Response.json(new URL(String(url)).searchParams.get("page") === "1" ? [{ number: 1, state: "open" }, { number: 1, state: "open" }] : []);
+  });
+  await assert.rejects(() => refreshProjects.refresh({ repository: "conveyal/r5", workflow: "cla.yml", ref: "dev", enabled: true }), /incomplete PR list/);
+  assert.equal(writes, 0);
 });

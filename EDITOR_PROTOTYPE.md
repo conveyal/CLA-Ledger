@@ -13,9 +13,12 @@ accepted signatures in the public Conveyal ledger.
 - Offline tests check the decoded URL contents against the canonical record
   and the production signature validator.
 - GitHub accepts the full URL and redirects a signed-out visitor to login.
-- Authenticated editor prefill, commit, and PR creation still need a browser test.
-- Contributor-check comments retain the documented signing instructions until
-  the authenticated prototype passes.
+- Authenticated editor prefill, commit, and PR creation passed for
+  `@trevorgerhardt` in [test PR #1](https://github.com/conveyal/cla-test/pull/1).
+  The PR is byte-for-byte identical to the generated fixture (4,618 bytes), and
+  the production signature validator passed.
+- The account has repository write access. Outsider forking remains unverified.
+- Contributor workflows can opt into personalized individual editor links.
 
 The compact test fixture produces a 5,212-character URL and reaches GitHub's
 login page successfully. A longer test-only introduction produced a
@@ -70,13 +73,13 @@ Do not introduce a hosted signing application without a separate decision.
 
 ## Subsequent work
 
-After the prototype passes, add personalized contributor comments, a shared
-CLA check bound to the PR head commit, and a fresh-dispatch evaluation path.
-Then configure the Conveyal-owned refresh App and accepted-record workflow,
+Personalized contributor comments, the shared PR-head CLA check, and fresh
+dispatch support are implemented. Configure the Conveyal-owned refresh App and accepted-record workflow,
 exercise automatic rechecking, publish tooling release `v0.0.1`, and use that
 release in the R5 pilot. R5's default branch is `dev`.
 
 The refresh App will need Actions write and Pull requests read on R5. Its
 private key belongs in CLA-Ledger's Actions secrets; the R5 workflow will use
 its own built-in token to publish comments and checks. Maintainer review
-remains the acceptance step for real signature PRs.
+remains the acceptance step for real signature PRs. See [SETUP_PROJECT.md](SETUP_PROJECT.md)
+for the exact App variables, secret, permissions, and rollout steps.

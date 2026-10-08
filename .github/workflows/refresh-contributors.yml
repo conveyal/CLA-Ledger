@@ -1,0 +1,56 @@
+name: Refresh contributor CLA checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'signatures/**'
+      - 'versions/**'
+      - 'cla/projects.json'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: List the PRs without requesting evaluations
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cla-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    # Setup is explicit. Missing App credentials never weaken consumer CLA checks.
+    if: ${{ github.ref == 'refs/heads/main' && vars.CLA_REFRESH_APP_CLIENT_ID != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: pnpm/setup@v3
+        with:
+          install: false
+      - name: Select enrolled repositories
+        id: projects
+        run: node .github/scripts/refresh_projects.ts --repositories
+      - name: Create a scoped refresh token
+        if: ${{ steps.projects.outputs.repositories != '' }}
+        id: token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.CLA_REFRESH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.CLA_REFRESH_APP_PRIVATE_KEY }}
+          owner: conveyal
+          repositories: ${{ steps.projects.outputs.repositories }}
+          permission-actions: write
+          permission-pull-requests: read
+      - name: Refresh open PRs
+        if: ${{ steps.projects.outputs.repositories != '' }}
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          DRY_RUN: ${{ inputs.dry_run || false }}
+        run: node .github/scripts/refresh_projects.ts

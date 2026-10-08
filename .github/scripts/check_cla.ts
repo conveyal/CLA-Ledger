@@ -7,6 +7,36 @@
  */
 
 import * as helpers from "./cla.ts";
+import { individualRecord, individualEditorUrl } from "./signature_record.ts";
+
+/** Leave room below GitHub's comment limit and the prototype's observed failing URL size. */
+const COMMENT_BUDGET = 60000;
+const EDITOR_URL_BUDGET = 5300;
+
+/** Public account metadata retained separately from display text for safe record generation. */
+interface MissingAuthor { login: string | null; id: string }
+
+/** Fit personalized links into one comment, retaining every missing author and the manual fallback. */
+function signingLines(root: string, version: string, missing: MissingAuthor[], remaining: number): string[] {
+  const settings = helpers.loadConfig(root);
+  const agreement = helpers.canonical(root, version);
+  const date = new Date().toISOString().slice(0, 10);
+  return missing.map(({ login, id }) => {
+    const label = `- @${login || "unknown"} (GitHub ID ${id})`;
+    if (process.env.EDITOR_LINKS !== "true" || !login) return label;
+    try {
+      const url = individualEditorUrl(settings, individualRecord(settings, agreement, login, id, version, date));
+      const extra = ` — [Sign the CLA](${url})`;
+      if (url.length <= EDITOR_URL_BUDGET && extra.length <= remaining) {
+        remaining -= extra.length;
+        return label + extra;
+      }
+    } catch {
+      // Non-GitHub ledgers and unusable identities retain the configured signing instructions.
+    }
+    return `${label} — use the signing instructions above`;
+  });
+}
 
 /** Read a required workflow input; an absent value prevents the check from running. */
 function env(name: string) {
@@ -40,7 +70,7 @@ async function main() {
   const version = helpers.currentVersion(root);
   const covered = helpers.records(root, version);
   // Account IDs remain stable when logins change and deduplicate authors across commits.
-  const missing = new Map<string, string>();
+  const missing = new Map<string, MissingAuthor>();
   // Keep unmapped commits separate: no ledger lookup can establish coverage for an unknown identity.
   const unknown = new Set<string>();
   const bots = new Set<string>();
@@ -52,7 +82,7 @@ async function main() {
     } else if (!author || author.id === undefined || author.id === null) {
       unknown.add(String(commit.sha || "unknown").slice(0, 12));
     } else if (!covered.has(String(author.id))) {
-      missing.set(String(author.id), `@${author.login || "unknown"} (GitHub ID ${author.id})`);
+      missing.set(String(author.id), { login: author.login || null, id: String(author.id) });
     }
   }
 
@@ -63,13 +93,19 @@ async function main() {
       `Current required version: \`${version}\``,
       `Sign here: ${signingUrl}`,
     ];
-    if (missing.size > 0) {
-      lines.push("", "Missing or stale records:");
-      lines.push(...[...missing.values()].sort().map((item) => `- ${item}`));
-    }
     if (unknown.size > 0) {
       lines.push("", "GitHub could not map these commit authors:");
       lines.push(...[...unknown].sort().map((item) => `- \`${item}\``));
+    }
+    if (missing.size > 0) {
+      const authors = [...missing.values()].sort((a, b) => (a.login || a.id).localeCompare(b.login || b.id));
+      // Reserve every label, fallback, instruction, and unknown-author entry before adding long URLs.
+      const reserved = authors.reduce((sum, author) => sum + (author.login?.length || 7) + author.id.length + 100, 0);
+      lines.push("", "Missing or stale records:");
+      lines.push(...signingLines(root, version, authors, Math.max(0, COMMENT_BUDGET - lines.join("\n").length - reserved - 1000)));
+      if (process.env.EDITOR_LINKS === "true") {
+        lines.push("", "Open your signing link, review the complete agreement, then commit on a new branch and create the signature PR using your own GitHub account. A maintainer must merge it before coverage is accepted.");
+      }
     }
     const body = lines.join("\n");
     await helpers.updateComment(repo, pr, body);
@@ -77,6 +113,7 @@ async function main() {
     return 1;
   }
   await helpers.assertPullRequestUnchanged(repo, pr, snapshot);
+  await helpers.updateComment(repo, pr, `All human commit authors are covered by Conveyal CLA \`${version}\`.`, false);
   console.log(`CLA check passed; exempt bots: ${[...bots].sort().join(", ") || "none"}.`);
   return 0;
 }
@@ -95,4 +132,4 @@ if (import.meta.main) {
   });
 }
 
-export { main };
+export { main, signingLines };

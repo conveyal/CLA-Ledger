@@ -4,9 +4,12 @@
 
 - Renumbered the unsigned provisional agreement to `v0.1`; legal review will
   produce a later version without rewriting accepted records.
-- Added a shared individual-record renderer and an experimental `--editor-url`
-  CLI option. The `conveyal/cla-test` prototype must pass authenticated browser
-  testing before contributor-check comments advertise personalized editor links.
+- Added a shared individual-record renderer, `--editor-url`, and opt-in
+  personalized signing comments. The maintainer-account browser prototype passed;
+  outsider forking remains a rollout check.
+- Added the commit-bound `Conveyal CLA` check and fresh-dispatch evaluations.
+- Added accepted-record refresh through an enrolled-project allowlist and a
+  scoped GitHub App. App installation and credentials are required to enable refresh.
 - Selected `v0.0.1` for the first tooling release, independently of agreement `v0.1`.
 
 ## Initial implementation

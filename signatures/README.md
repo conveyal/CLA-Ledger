@@ -9,9 +9,11 @@ node sign.ts <github-login> --id <numeric-id> --individual
 
 Run `node sign.ts` without arguments to answer the same questions interactively.
 
-The current provisional agreement is `v0.1`. An experimental `--editor-url`
-option prepares an individual signing link without writing a file; see the
-[browser prototype](../EDITOR_PROTOTYPE.md) before relying on that flow.
+The current provisional agreement is `v0.1`. The `--editor-url` option prepares
+an individual signing link without writing a file. Opted-in contribution
+workflows also include these links beside uncovered authors. Review the full
+record in the GitHub editor, commit on a new branch, and open the signature PR
+using the named account. See the [browser evidence](../EDITOR_PROTOTYPE.md).
 
 Generate a corporate authorization with `--corporate --organization <slug>`
 and one or more `--authorized-id` values. Include the complete set of accounts

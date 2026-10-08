@@ -23,3 +23,20 @@ records, including renames out of the signature directory.
 PR file and commit lists must match the counts in GitHub's PR metadata. The
 checker verifies the PR head and base before accepting a result. API limits,
 incomplete lists, and changes during validation fail closed.
+
+Ordinary PR runs bind their head to the event. Fresh dispatches resolve an open
+PR in the caller repository through the API. Both publish the same named check
+on that head SHA, independently of the Actions run's own commit association.
+They use trusted caller-base and pinned implementation checkouts. Checkout
+failures complete the prepared check as failure; per-PR concurrency cancels
+superseded evaluations.
+
+Personalized editor links reproduce the complete agreement and record template
+for each uncovered account. They do not submit a signature or establish identity.
+The PR opener still supplies authentication. A conservative URL budget and a
+comment-size budget retain manual instructions when a full link cannot fit.
+
+The accepted-record refresh workflow reads an explicit project allowlist and
+uses a scoped App installation token to dispatch fresh evaluations. Consumers
+publish their own comments and commit-bound checks with GITHUB_TOKEN. The App
+does not need contributor authorization or permission to write source files.
