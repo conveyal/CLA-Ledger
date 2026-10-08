@@ -1,4 +1,4 @@
-# Conveyal Contributor License Agreement (v1.0 — provisional)
+# Conveyal Contributor License Agreement (v0.1 — provisional)
 
 **Provisional implementation draft — legal review pending.** This agreement is
 intended for Conveyal LLC's organization-wide open-source projects, including

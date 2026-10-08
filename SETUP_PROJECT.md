@@ -23,7 +23,7 @@ supplies no coverage until a maintainer merges it. See the
 Select a published release from the ledger's
 [Releases page](https://github.com/conveyal/CLA-Ledger/releases).
 Review its release notes and verify that GitHub marks it **Immutable**.
-Use the exact release tag, such as `v1.0.0`, for both the workflow reference
+Use the exact release tag, such as `v0.0.1`, for both the workflow reference
 and `implementation_ref`. A floating tag such as `v1` can change between runs.
 
 Tooling releases and agreement versions are independent. A tooling release
@@ -34,7 +34,7 @@ GitHub documents release tag references in its
 ## 2. Add or update the R5 caller
 
 Create or replace `.github/workflows/cla.yml` in R5 with this content.
-The example uses `v1.0.0`; substitute your selected published version in both places.
+The example uses `v0.0.1`; substitute your selected published version in both places.
 The example version must exist as an immutable release before this caller can run.
 An existing caller that references `main` needs both references updated.
 
@@ -52,12 +52,12 @@ permissions:
 jobs:
   check:
     name: Check contributor coverage
-    uses: conveyal/CLA-Ledger/.github/workflows/check-contributors.yml@v1.0.0
+    uses: conveyal/CLA-Ledger/.github/workflows/check-contributors.yml@v0.0.1
     with:
       ledger_repository: conveyal/CLA-Ledger
       ledger_data_ref: main
       implementation_repository: conveyal/CLA-Ledger
-      implementation_ref: v1.0.0
+      implementation_ref: v0.0.1
       signing_url: https://github.com/conveyal/CLA-Ledger/blob/main/CLA.md
     permissions:
       contents: read

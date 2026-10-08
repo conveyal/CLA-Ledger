@@ -9,6 +9,10 @@ node sign.ts <github-login> --id <numeric-id> --individual
 
 Run `node sign.ts` without arguments to answer the same questions interactively.
 
+The current provisional agreement is `v0.1`. An experimental `--editor-url`
+option prepares an individual signing link without writing a file; see the
+[browser prototype](../EDITOR_PROTOTYPE.md) before relying on that flow.
+
 Generate a corporate authorization with `--corporate --organization <slug>`
 and one or more `--authorized-id` values. Include the complete set of accounts
 to authorize, including accounts retained from the previous snapshot. Open the

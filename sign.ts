@@ -11,6 +11,7 @@ import * as path from "node:path";
 import * as readline from "node:readline/promises";
 import { parseArgs as parseNodeArgs } from "node:util";
 import { nextCorporateSnapshot, errorMessage, isObject, parseConfig, type ClaConfig } from "./.github/scripts/cla.ts";
+import { buildIndividual, individualRecord, individualEditorUrl } from "./.github/scripts/signature_record.ts";
 
 /** Parsed signing choices; prompts fill missing values before record generation. */
 interface SignArgs {
@@ -21,6 +22,7 @@ interface SignArgs {
   authorizedIds: string[];
   corporate?: boolean;
   help?: boolean;
+  editorUrl?: boolean;
 }
 
 /** Stop generation with an error that the CLI prints as a failed exit status. */
@@ -55,6 +57,7 @@ function parseArgs(argv: string[]): SignArgs {
         config: { type: "string" },
         login: { type: "string" },
         "authorized-id": { type: "string", multiple: true },
+        "editor-url": { type: "boolean" },
       },
       allowPositionals: true,
       tokens: true,
@@ -76,6 +79,7 @@ function parseArgs(argv: string[]): SignArgs {
   const login = parsed.values.login || parsed.positionals[0];
   if (corporate !== undefined) result.corporate = corporate;
   if (parsed.values.help) result.help = true;
+  if (parsed.values["editor-url"]) result.editorUrl = true;
   if (login !== undefined) result.login = login;
   if (parsed.values.id !== undefined) result.id = parsed.values.id;
   if (parsed.values.version !== undefined) result.version = parsed.values.version;
@@ -124,13 +128,6 @@ async function resolveId(login: string) {
 function numericId(value: string | undefined, label: string) {
   if (!/^\d+$/.test(String(value || ""))) fail(`${label} must contain only digits`);
   return String(value);
-}
-
-/** Build the individual signature block; callers prepend the canonical agreement and validate inputs. */
-function buildIndividual(config: ClaConfig, login: string, id: string, version: string, date: string) {
-  const prefix = config.cla_root === "." ? "" : `${config.cla_root}/`;
-  const link = `${config.ledger_blob}/${prefix}versions/CLA-${version}.md`;
-  return `---\n\n## Signature\n\nI, @${login} (GitHub account ID: ${id}), agree to and sign the\n[Conveyal Contributor License Agreement, version ${version.slice(1)}](${link})\n— reproduced in full above — for Conveyal's organization-wide open-source projects.\n\n- GitHub login: ${login}\n- GitHub account ID: ${id}\n- CLA version: ${version}\n- Signature type: individual\n- Date: ${date}\n`;
 }
 
 /**
@@ -197,7 +194,7 @@ async function promptForMissing(args: SignArgs) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
-    console.log("Usage: node sign.ts [login] [--id ID] [--individual | --corporate --organization SLUG --authorized-id ID] [--version VERSION]");
+    console.log("Usage: node sign.ts [login] [--id ID] [--individual | --corporate --organization SLUG --authorized-id ID] [--version VERSION] [--editor-url]");
     return 0;
   }
   const config = loadConfig();
@@ -218,6 +215,14 @@ async function main() {
   const version = currentVersion(config, args.version);
   const date = new Date().toISOString().slice(0, 10);
   const organization = args.organization || "";
+  if (args.editorUrl && args.corporate) fail("--editor-url supports individual records only");
+  const individual = args.corporate ? undefined : individualRecord(config, canonical(config, version), login, id, version, date);
+  if (args.editorUrl) {
+    if (!individual) fail("an individual record is required");
+    if (fs.existsSync(path.join(config.cla_root, individual.path))) fail("this account already has a record for the selected version");
+    console.log(individualEditorUrl(config, individual));
+    return 0;
+  }
   if (args.corporate && !/^[a-z0-9][a-z0-9._-]*$/.test(organization)) fail("organization must be a lowercase GitHub slug");
   const corporateDirectory = path.join(config.cla_root, "signatures", version, "corporate", organization);
   // Corporate updates add numbered snapshots; individual records are unique per account and CLA version.
@@ -232,7 +237,7 @@ async function main() {
   fs.mkdirSync(path.dirname(output), { recursive: true });
   try {
     // Exclusive creation protects existing records even if another process creates the path after selection.
-    fs.writeFileSync(output, `${canonical(config, version)}\n\n${block}`, { encoding: "utf8", flag: "wx" });
+    fs.writeFileSync(output, individual?.text ?? `${canonical(config, version)}\n\n${block}`, { encoding: "utf8", flag: "wx" });
   } catch (error) {
     if (isObject(error) && error.code === "EEXIST") fail(`${output} already exists; records are append-only and cannot be replaced`);
     throw error;

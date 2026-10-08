@@ -16,8 +16,8 @@ version, coverage uses the newest accepted snapshot for each organization,
 together with individual signatures. An authorization change does not undo
 grants already accepted for earlier contributions.
 
-The first R5 agreement is explicitly provisional and has no governing-law or
-venue clause. Counsel review should produce the next material version.
+The first R5 agreement, `v0.1`, is explicitly provisional and has no
+governing-law or venue clause. Counsel review should produce the next material version.
 
 During an outage, only designated maintainers may bypass the required check.
 They must record the PR, reason, and approving maintainer in the maintainer-only

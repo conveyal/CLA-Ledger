@@ -55,7 +55,7 @@ release selection, rollout checks, and branch protection setup.
 
 Consumer repositories need only a small caller workflow. It supplies the
 central ledger repository and data ref (normally `main`), a reviewed immutable
-release tag (such as `v1.0.0`), and the central signing URL. Use the same tag
+release tag (such as `v0.0.1`), and the central signing URL. Use the same tag
 for the reusable workflow reference and `implementation_ref`.
 The reusable job checks out
 the consumer's trusted base, the central ledger data, and the pinned
@@ -65,6 +65,11 @@ never executes code from an untrusted pull request.
 See [RELEASING.md](RELEASING.md) to publish a tooling release. Tooling releases
 are independent of CLA agreement versions. New accepted signatures become
 available through ledger data at `main` without a tooling release.
+
+The current provisional agreement is `v0.1`; the first tooling release is
+planned as `v0.0.1`. These version numbers are independent. The
+[editor-link prototype](EDITOR_PROTOTYPE.md) describes the disposable browser
+test that must pass before personalized signing links are enabled.
 
 To add another repository, copy the caller workflow and change only its
 repository-specific signing link if needed. No central enrollment file is

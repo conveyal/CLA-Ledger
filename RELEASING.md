@@ -2,22 +2,23 @@
 
 A tooling release versions the reusable workflows, validation scripts, and
 signing helper. Consumer repositories reference its exact tag, such as
-`v1.0.0`, in their caller workflows. GitHub Releases provide release notes and
+`v0.0.1`, in their caller workflows. GitHub Releases provide release notes and
 protect published tags when release immutability is enabled.
 
-This guide uses `v1.0.0` as an example. Substitute the new version throughout
+This guide uses `v0.0.1` as an example. Substitute the new version throughout
 the commands. Publishing a release requires write access to
 `conveyal/CLA-Ledger` and an authenticated GitHub CLI.
 
 ## Version policy
 
-Use `vMAJOR.MINOR.PATCH` for tooling releases:
+Use `vMAJOR.MINOR.PATCH` for tooling releases. Before 1.0, a minor release may
+contain breaking changes; identify them explicitly in the release notes:
 
 | Change | Example |
 | --- | --- |
-| Backward-compatible bug fix | `v1.0.0` → `v1.0.1` |
-| Backward-compatible feature or optional workflow input | `v1.0.0` → `v1.1.0` |
-| Breaking workflow, signing, or record-format change | `v1.0.0` → `v2.0.0` |
+| Backward-compatible bug fix | `v0.0.1` → `v0.0.2` |
+| Backward-compatible feature or optional workflow input | `v0.0.1` → `v0.1.0` |
+| Breaking workflow, signing, or record-format change before 1.0 | `v0.0.1` → `v0.1.0` |
 
 Agreement versions follow [GOVERNANCE.md](GOVERNANCE.md) and
 `versions/CURRENT`. A tooling release does not itself change the agreement
@@ -69,17 +70,17 @@ Commit and push any release documentation changes before creating the tag.
 Create and push an annotated tag for the reviewed local commit:
 
 ```sh
-git tag -a v1.0.0 -m "CLA Ledger v1.0.0"
-git push origin v1.0.0
+git tag -a v0.0.1 -m "CLA Ledger v0.0.1"
+git push origin v0.0.1
 ```
 
 Create a draft release from that existing tag:
 
 ```sh
-gh release create v1.0.0 \
+gh release create v0.0.1 \
   --repo conveyal/CLA-Ledger \
   --verify-tag \
-  --title "CLA Ledger v1.0.0" \
+  --title "CLA Ledger v0.0.1" \
   --generate-notes \
   --draft
 ```
@@ -97,7 +98,7 @@ files at the tag, so the release needs no compiled asset.
 Verify that the draft references the reviewed tag. Then publish it:
 
 ```sh
-gh release edit v1.0.0 \
+gh release edit v0.0.1 \
   --repo conveyal/CLA-Ledger \
   --draft=false
 ```
@@ -112,9 +113,9 @@ For corrections, publish a new version rather than moving an existing release ta
 Update both references in each consumer's caller workflow to the new tag:
 
 ```yaml
-uses: conveyal/CLA-Ledger/.github/workflows/check-contributors.yml@v1.0.0
+uses: conveyal/CLA-Ledger/.github/workflows/check-contributors.yml@v0.0.1
 with:
-  implementation_ref: v1.0.0
+  implementation_ref: v0.0.1
   ledger_data_ref: main
 ```
 
