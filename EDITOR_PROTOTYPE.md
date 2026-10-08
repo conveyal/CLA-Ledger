@@ -17,6 +17,13 @@ accepted signatures in the public Conveyal ledger.
 - Contributor-check comments retain the documented signing instructions until
   the authenticated prototype passes.
 
+The compact test fixture produces a 5,212-character URL and reaches GitHub's
+login page successfully. A longer test-only introduction produced a
+5,528-character URL whose login redirect returned HTTP 500. Both included the
+entire agreement; shortening only the test notice fixed that observed failure.
+This is evidence of a URL-size constraint in this flow, not a documented
+universal limit. Future agreement changes must repeat the browser test.
+
 GitHub documents its automatic fork-and-propose workflow in
 [Creating new files](https://docs.github.com/en/repositories/working-with-files/managing-files/creating-new-files).
 The `filename` and `value` URL parameters are experimental here; passing the
