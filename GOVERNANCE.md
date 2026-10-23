@@ -6,6 +6,11 @@ Conveyal maintainers review and merge records on EBP's behalf. GitHub merge
 permission alone does not establish EBP's authorization. The current
 required version is the value in `versions/CURRENT`.
 
+One accepted signature per CLA version covers all open-source repositories in
+the Conveyal GitHub organization (`conveyal`), including future additions.
+Repository workflows and refresh enrollment control enforcement, not agreement
+scope. Corporate coverage remains limited to authorized contributor accounts.
+
 CLA text is immutable once signed. A material change to the grant,
 representations, execution, identity, or scope creates a new `vMAJOR.MINOR`
 version and requires new records for future contributions. Existing records are

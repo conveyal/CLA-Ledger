@@ -111,6 +111,7 @@ interface RecordedRequest {
  * Unexpected read endpoints throw; captured requests expose the check's API behavior.
  */
 function mockPR(t: TestContext, options: MockPROptions = {}) {
+  const repo = process.env.REPO || "conveyal/CLA-Ledger";
   const files = options.files || [{ filename: individualPath, status: "added" }];
   const commits = options.commits || [{ sha: "commit-1", author: { login: "octocat", id: 1, type: "User" } }];
   const metadata = {
@@ -124,7 +125,7 @@ function mockPR(t: TestContext, options: MockPROptions = {}) {
     const parsed = new URL(String(url));
     requests.push({ url: String(url), method: request.method || "GET", body: request.body });
     if (request.method === "POST" || request.method === "PATCH") return Response.json({});
-    if (parsed.pathname === "/repos/conveyal/CLA-Ledger/pulls/1") {
+    if (parsed.pathname === `/repos/${repo}/pulls/1`) {
       metadataReads += 1;
       return Response.json(metadataReads > 1 && options.latestMetadata ? options.latestMetadata : metadata);
     }
@@ -181,10 +182,20 @@ test("the agreement names EBP as the legal party while retaining Conveyal projec
   const settings = helpers.parseConfig(JSON.parse(fs.readFileSync(path.join(repositoryRoot, "cla/config.json"), "utf8")), "cla/config.json");
   assert.equal(settings.organization_name, "EBP US Inc.");
   assert.match(agreement, /rights you grant to EBP US Inc\.\s+\("EBP"\)/);
-  assert.match(agreement, /Conveyal GitHub organization\s+\(`conveyal`\)/);
+  assert.match(agreement, /Conveyal GitHub\s+organization\s+\(`conveyal`\)/);
   assert.match(agreement, /authorized Conveyal maintainers accept the offer\s+on behalf of EBP/);
   assert.match(agreement, /does not cover unrelated EBP\s+projects outside that organization/);
   assert.doesNotMatch(agreement, /Conveyal LLC|You grant Conveyal/);
+});
+
+test("the agreement explicitly covers all current and future open-source repositories with one signature", () => {
+  const agreement = helpers.canonical(repositoryRoot, helpers.currentVersion(repositoryRoot));
+  assert.match(agreement, /"Covered project" means any open-source repository in the Conveyal GitHub\s+organization \(`conveyal`\)/);
+  assert.match(agreement, /including future additions/);
+  assert.match(agreement, /One accepted signature per Agreement version covers all covered projects/);
+  assert.match(agreement, /no separate repository signatures are required/);
+  assert.match(agreement, /Workflow and refresh enrollment do not limit\s+coverage/);
+  assert.doesNotMatch(agreement, /\bR5\b|organization-wide program/);
 });
 
 test("individual and corporate validators reject signature scope outside the Conveyal organization", () => {
@@ -357,6 +368,28 @@ test("complete 250-commit PRs pass, including authors on the final page", async 
   const { requests } = mockPR(t, { files: [{ filename: "src/main.java", status: "modified" }], commits });
   assert.equal(await check.main(), 0);
   assert.equal(requests.filter((item) => item.url.includes("/commits?")).length, 4);
+});
+
+test("one accepted record supplies coverage across consumer repositories without refresh enrollment", async (t) => {
+  for (const corporate of [false, true]) {
+    await t.test(corporate ? "corporate authorization" : "individual signature", async (t) => {
+      const root = fixture();
+      sandbox(t, root);
+      const recordPath = corporate ? corporatePath : individualPath;
+      const text = record(root, "v1.0", corporate);
+      write(root, recordPath, text);
+      for (const repo of ["conveyal/example-existing", "conveyal/example-new"]) {
+        await t.test(repo, async (t) => {
+          process.env.REPO = repo;
+          const { requests } = mockPR(t, { files: [{ filename: "README.md", status: "modified" }] });
+          assert.equal(await check.main(), 0);
+          assert.ok(requests.some(({ url }) => new URL(url).pathname === `/repos/${repo}/pulls/1`));
+          assert.equal(fs.readFileSync(path.join(root, recordPath), "utf8"), text);
+          assert.equal(fs.existsSync(path.join(root, "cla/projects.json")), false);
+        });
+      }
+    });
+  }
 });
 
 test("distinct changed files with identical blob SHAs do not count as duplicates", async (t) => {
