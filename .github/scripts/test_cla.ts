@@ -26,7 +26,7 @@ const repositoryRoot = process.cwd();
 const script = path.resolve("sign.ts");
 // Keep fixtures until suite teardown so nested tests can share a ledger safely.
 const temporaryRoots: string[] = [];
-const config = { cla_root: ".", ledger_blob: "https://example.test/blob", organization_name: "Conveyal LLC" };
+const config = { cla_root: ".", ledger_blob: "https://example.test/blob", organization_name: "EBP US Inc." };
 const individualPath = "signatures/v1.0/individual/1.md";
 const corporatePath = "signatures/v1.0/corporate/acme/0001.md";
 
@@ -174,6 +174,36 @@ test("current versions and dates are validated", () => {
 test("the current agreement matches the public signing document", () => {
   const version = helpers.currentVersion(repositoryRoot);
   assert.equal(fs.readFileSync(path.join(repositoryRoot, "CLA.md"), "utf8").trimEnd(), helpers.canonical(repositoryRoot, version));
+});
+
+test("the agreement names EBP as the legal party while retaining Conveyal project scope", () => {
+  const agreement = helpers.canonical(repositoryRoot, helpers.currentVersion(repositoryRoot));
+  const settings = helpers.parseConfig(JSON.parse(fs.readFileSync(path.join(repositoryRoot, "cla/config.json"), "utf8")), "cla/config.json");
+  assert.equal(settings.organization_name, "EBP US Inc.");
+  assert.match(agreement, /rights you grant to EBP US Inc\.\s+\("EBP"\)/);
+  assert.match(agreement, /Conveyal GitHub organization\s+\(`conveyal`\)/);
+  assert.match(agreement, /authorized Conveyal maintainers accept the offer\s+on behalf of EBP/);
+  assert.match(agreement, /does not cover unrelated EBP\s+projects outside that organization/);
+  assert.doesNotMatch(agreement, /Conveyal LLC|You grant Conveyal/);
+});
+
+test("individual and corporate validators reject signature scope outside the Conveyal organization", () => {
+  for (const corporate of [false, true]) {
+    const root = fixture();
+    const agreement = helpers.canonical(root, "v1.0");
+    const text = record(root, "v1.0", corporate);
+    const validateRecord = (value: string) => corporate
+      ? validate.corporateError(value, agreement, "v1.0", "octocat", "1", "acme")
+      : validate.individualError(value, agreement, "v1.0", "octocat", "1");
+    assert.equal(validateRecord(text), null);
+    for (const scope of ["EBP's organization-wide open-source projects", "Conveyal's organization-wide open-source projects"]) {
+      const altered = text.replace("for open-source projects in the Conveyal GitHub organization.", `for ${scope}.`);
+      assert.notEqual(altered, text);
+      assert.notEqual(validateRecord(altered), null);
+      write(root, corporate ? corporatePath : individualPath, altered);
+      assert.deepEqual(helpers.records(root, "v1.0"), new Set());
+    }
+  }
 });
 
 test("editor links round-trip the complete canonical record and pass signer validation", () => {

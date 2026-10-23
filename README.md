@@ -10,6 +10,11 @@ Conveyal. It contains the canonical agreement versions, public signature
 records, signing helper, validation logic, and reusable workflows used by R5
 and any other opted-in repository.
 
+EBP US Inc. is the CLA's legal party and license recipient. The agreement covers
+open-source projects in the Conveyal GitHub organization (`conveyal`), not
+unrelated EBP projects outside that organization. Authorized Conveyal maintainers
+accept signature records on EBP's behalf.
+
 The helper and workflow scripts require Node.js 24.2 or newer and use only Node's
 built-in modules. No npm install or TypeScript compiler is required; run them
 directly with `node path/to/script.ts`.
