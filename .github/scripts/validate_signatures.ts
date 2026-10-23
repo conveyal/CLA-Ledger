@@ -83,7 +83,7 @@ function individualError(text: string, agreement: string, version: string, autho
     String.raw`^\s*---\s*## Signature\s+` +
     String.raw`I,\s+@${escapeRegex(author)}\s+\(GitHub account ID:\s+${escapeRegex(authorId)}\),\s+agree to and sign the\s+` +
     String.raw`\[Conveyal Contributor License Agreement, version ${escapeRegex(version.replace(/^v/, ""))}\]\(${expectedLink ? escapeRegex(expectedLink) : "[^\\s)]+"}\)\s+` +
-    String.raw`— reproduced in full above — for Conveyal's organization-wide open-source projects\.\s+` +
+    String.raw`— reproduced in full above — for open-source projects in the Conveyal GitHub organization\.\s+` +
     String.raw`- GitHub login:\s+${escapeRegex(author)}\s+` +
     String.raw`- GitHub account ID:\s+${escapeRegex(authorId)}\s+` +
     String.raw`- CLA version:\s+${escapeRegex(version)}\s+` +
@@ -107,7 +107,7 @@ function corporateError(text: string, agreement: string, version: string, author
     String.raw`^\s*---\s*## Corporate Authorization\s+` +
     String.raw`I,\s+@${escapeRegex(author)}\s+\(GitHub account ID:\s+${escapeRegex(authorId)}\),\s+confirm that I am authorized\s+` +
     String.raw`to accept the \[Conveyal Contributor License Agreement, version ${escapeRegex(version.replace(/^v/, ""))}\]\(${expectedLink ? escapeRegex(expectedLink) : "[^\\s)]+"}\)\s+` +
-    "on behalf of the organization `([^`]+)` for the authorized GitHub\\s+accounts listed below, for Conveyal's organization-wide open-source projects\\.\\s+" +
+    "on behalf of the organization `([^`]+)` for the authorized GitHub\\s+accounts listed below, for open-source projects in the Conveyal GitHub organization\\.\\s+" +
     String.raw`- Organization:\s+([^\s]+)\s+` +
     String.raw`- Representative GitHub login:\s+${escapeRegex(author)}\s+` +
     String.raw`- Representative GitHub account ID:\s+${escapeRegex(authorId)}\s+` +

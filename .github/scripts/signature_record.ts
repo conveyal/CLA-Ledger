@@ -15,7 +15,7 @@ interface IndividualRecord {
 /** Render the signature block shared by the CLI and editor-link generator. */
 function buildIndividual(config: ClaConfig, login: string, id: string, version: string, date: string) {
   const link = recordLink(config, version);
-  return `---\n\n## Signature\n\nI, @${login} (GitHub account ID: ${id}), agree to and sign the\n[Conveyal Contributor License Agreement, version ${version.slice(1)}](${link})\n— reproduced in full above — for Conveyal's organization-wide open-source projects.\n\n- GitHub login: ${login}\n- GitHub account ID: ${id}\n- CLA version: ${version}\n- Signature type: individual\n- Date: ${date}\n`;
+  return `---\n\n## Signature\n\nI, @${login} (GitHub account ID: ${id}), agree to and sign the\n[Conveyal Contributor License Agreement, version ${version.slice(1)}](${link})\n— reproduced in full above — for open-source projects in the Conveyal GitHub organization.\n\n- GitHub login: ${login}\n- GitHub account ID: ${id}\n- CLA version: ${version}\n- Signature type: individual\n- Date: ${date}\n`;
 }
 
 /** Require literal identity fields and preserve the canonical agreement's internal whitespace. */

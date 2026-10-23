@@ -2,8 +2,10 @@
 
 ### Why is a CLA required?
 
-It gives Conveyal LLC permission to use, modify, distribute, and sublicense
-contributions while contributors retain ownership and may reuse their work.
+It gives EBP US Inc. permission to use, modify, distribute, and sublicense
+contributions to covered open-source projects in the Conveyal GitHub organization
+(`conveyal`). Contributors retain ownership and may reuse their work. The CLA
+does not cover unrelated EBP projects outside that organization.
 
 ### Who signs?
 
@@ -23,8 +25,8 @@ Clone `conveyal/CLA-Ledger` and run
 You may also run `node sign.ts` with no arguments; the helper prompts for
 missing values. Review the generated
 `signatures/<version>/individual/<id>.md`, commit it, and open a pull request
-against `conveyal/CLA-Ledger` from that account. A maintainer reviews and merges
-the record.
+against `conveyal/CLA-Ledger` from that account. An authorized Conveyal maintainer
+reviews and merges the record on behalf of EBP US Inc.
 
 Corporate representatives use `--corporate --organization <slug>` and repeat
 `--authorized-id` for each covered account. Each update adds a numbered

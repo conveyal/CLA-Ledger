@@ -1,7 +1,9 @@
 # CLA governance
 
 The deployed ledger is public in `conveyal/CLA-Ledger`. A merged signature
-record is Conveyal's acceptance of the contributor's offer. The current
+record is EBP US Inc.'s acceptance of the contributor's offer. Authorized
+Conveyal maintainers review and merge records on EBP's behalf. GitHub merge
+permission alone does not establish EBP's authorization. The current
 required version is the value in `versions/CURRENT`.
 
 CLA text is immutable once signed. A material change to the grant,

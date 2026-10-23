@@ -4,6 +4,9 @@
 
 - Finalized the unsigned pre-release agreement as `v1.0` and removed draft labels.
 - Updated canonical paths, signing instructions, and test fixtures for `v1.0`.
+- Named EBP US Inc. as the legal party and license recipient, with authorized
+  Conveyal maintainers accepting records on its behalf. Coverage remains limited
+  to open-source projects in the Conveyal GitHub organization.
 
 ## v0.0.1 — 2026-10-08
 

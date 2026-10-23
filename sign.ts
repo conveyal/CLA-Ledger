@@ -138,7 +138,7 @@ function buildCorporate(config: ClaConfig, login: string, id: string, organizati
   const prefix = config.cla_root === "." ? "" : `${config.cla_root}/`;
   const link = `${config.ledger_blob}/${prefix}versions/CLA-${version}.md`;
   const ids = [...new Set([...authorized, id])].sort((a, b) => BigInt(a) < BigInt(b) ? -1 : BigInt(a) > BigInt(b) ? 1 : 0);
-  return `---\n\n## Corporate Authorization\n\nI, @${login} (GitHub account ID: ${id}), confirm that I am authorized\nto accept the [Conveyal Contributor License Agreement, version ${version.slice(1)}](${link})\non behalf of the organization \`${organization}\` for the authorized GitHub\naccounts listed below, for Conveyal's organization-wide open-source projects.\n\n- Organization: ${organization}\n- Representative GitHub login: ${login}\n- Representative GitHub account ID: ${id}\n- Authorized GitHub account IDs: ${ids.join(", ")}\n- CLA version: ${version}\n- Signature type: corporate\n- Date: ${date}\n`;
+  return `---\n\n## Corporate Authorization\n\nI, @${login} (GitHub account ID: ${id}), confirm that I am authorized\nto accept the [Conveyal Contributor License Agreement, version ${version.slice(1)}](${link})\non behalf of the organization \`${organization}\` for the authorized GitHub\naccounts listed below, for open-source projects in the Conveyal GitHub organization.\n\n- Organization: ${organization}\n- Representative GitHub login: ${login}\n- Representative GitHub account ID: ${id}\n- Authorized GitHub account IDs: ${ids.join(", ")}\n- CLA version: ${version}\n- Signature type: corporate\n- Date: ${date}\n`;
 }
 
 /**
