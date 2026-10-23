@@ -8,7 +8,7 @@ accepted signatures in the public Conveyal ledger.
 
 ## Current state
 
-- The agreement is `v0.1`. Tooling release
+- The current ledger agreement is `v1.0`. Tooling release
   [v0.0.1](https://github.com/conveyal/CLA-Ledger/releases/tag/v0.0.1)
   is published and immutable. The fixture workflows now use that release.
 - `sign.ts --editor-url` generates a URL without creating a local record.
@@ -67,7 +67,7 @@ does not create a branch, commit, or PR; the contributor performs those actions.
 
 1. Sign in as the account named in the test repository's link.
 2. Open its **Open the prefilled test file** link.
-3. Verify the filename is `signatures/v0.1/individual/<account-id>.md`.
+3. Verify the filename is `signatures/<fixture-version>/individual/<account-id>.md`, using the test repository's `versions/CURRENT` value.
 4. Verify the editor includes the test-only notice, the entire agreement, and
    the signature block. The test fixture also contains Unicode and literal
    `+`, `&`, `#`, and `%` characters to detect encoding problems.
