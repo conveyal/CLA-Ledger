@@ -1,15 +1,13 @@
 # Conveyal Contributor License Agreement (v1.0)
 
-This agreement is for open-source projects in the Conveyal GitHub organization
-(`conveyal`), including R5. The legal entity responsible for these projects is
-EBP US Inc. This agreement is adapted from the Cloud Security Alliance CLA-Ledger
-and is not legal advice.
-
-Thank you for contributing to Conveyal's open-source projects. This Contributor
-License Agreement ("Agreement") records the rights you grant to EBP US Inc.
-("EBP") for Contributions submitted to a covered project.
+This Contributor License Agreement ("Agreement") records the rights you grant to EBP US Inc.
+("EBP") for Contributions to covered projects. It is adapted from the Cloud
+Security Alliance CLA-Ledger and is not legal advice.
 
 ## 1. Definitions
+
+"Covered project" means any open-source repository in the Conveyal GitHub
+organization (`conveyal`), including future additions.
 
 "You" means the individual natural person who submits a Contribution and
 enters this Agreement, or an authorized representative signing a corporate
@@ -74,11 +72,14 @@ on behalf of EBP.
 
 ## 7. Scope and versions
 
-This Agreement covers present and future Contributions to covered open-source
-projects in the Conveyal GitHub organization (`conveyal`), including projects
-later added to its organization-wide program. It does not cover unrelated EBP
-projects outside that organization. It is forward-looking and does not re-bind
-historical contributions.
+This Agreement covers present and future Contributions to all covered projects.
+One accepted signature per Agreement version covers all covered projects;
+no separate repository signatures are required. Corporate coverage is limited
+to authorized contributor accounts. Workflow and refresh enrollment do not limit
+coverage.
+
+This Agreement does not cover unrelated EBP projects outside that organization.
+It is forward-looking and does not re-bind historical contributions.
 Material changes receive a new version and require a new record for future
 Contributions; prior records and grants remain effective under their signed
 version.

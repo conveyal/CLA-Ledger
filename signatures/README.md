@@ -1,6 +1,11 @@
 # Signature record templates
 
 The central ledger stores append-only records under `signatures/<version>/`.
+One accepted signature per CLA version covers all Conveyal GitHub organization
+open-source repositories, including future additions. Corporate coverage applies
+to the accounts authorized by the accepted record. No repository-specific
+signature is required.
+
 Generate an individual record with:
 
 ```sh

@@ -7,13 +7,18 @@ licensed under CC BY 4.0, and modified for Conveyal's open-source projects.
 
 This public repository is the authoritative organization-wide ledger for
 Conveyal. It contains the canonical agreement versions, public signature
-records, signing helper, validation logic, and reusable workflows used by R5
-and any other opted-in repository.
+records, signing helper, validation logic, and reusable workflows for Conveyal's
+open-source repositories.
 
 EBP US Inc. is the CLA's legal party and license recipient. The agreement covers
 open-source projects in the Conveyal GitHub organization (`conveyal`), not
 unrelated EBP projects outside that organization. Authorized Conveyal maintainers
 accept signature records on EBP's behalf.
+
+One accepted signature per CLA version covers all open-source repositories in
+the organization, including future additions. Contributors do not sign again
+for each repository. Workflow installation and automatic refresh enrollment
+affect enforcement, not agreement scope.
 
 The helper and workflow scripts require Node.js 24.2 or newer and use only Node's
 built-in modules. No npm install or TypeScript compiler is required; run them
@@ -55,7 +60,7 @@ pull requests and pushes to `main`. It sets up pnpm and Node.js from
 
 ## Using the ledger from another repository
 
-Follow [SETUP_PROJECT.md](SETUP_PROJECT.md) for the R5 caller workflow,
+Follow [SETUP_PROJECT.md](SETUP_PROJECT.md) for the caller workflow,
 release selection, rollout checks, and branch protection setup.
 
 Consumer repositories need only a small caller workflow. It supplies the
@@ -77,9 +82,10 @@ planned as `v0.0.1`. These version numbers are independent. The
 browser test and the remaining outsider-fork test. Consumers can enable
 individual signing links with `personalized_signing_links: true`.
 
-To add another repository, copy the caller workflow and change only its
-repository-specific signing link if needed. Coverage checking needs no central
-enrollment. Automatic refresh additionally requires an entry in
+To add enforcement to another repository, copy the caller workflow, keep the
+central ledger and signing URL, and configure the required check. Existing
+current-version signatures already cover its contributors. Coverage checking
+needs no central enrollment. Automatic refresh additionally requires an entry in
 `cla/projects.json` and the scoped GitHub App described in [SETUP_PROJECT.md](SETUP_PROJECT.md).
 
 Checks verify that GitHub returned every changed file and commit, and that the
@@ -94,4 +100,4 @@ Refresh dispatches resolve current revisions instead of replaying old events.
 ## Attribution
 
 Based on Cloud Security Alliance's CLA-Ledger, licensed under CC BY 4.0.
-Modified by Conveyal for GitHub-native use in R5 and other Conveyal projects.
+Modified by Conveyal for GitHub-native use in its open-source projects, for example, R5.

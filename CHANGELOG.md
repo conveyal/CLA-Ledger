@@ -7,6 +7,9 @@
 - Named EBP US Inc. as the legal party and license recipient, with authorized
   Conveyal maintainers accepting records on its behalf. Coverage remains limited
   to open-source projects in the Conveyal GitHub organization.
+- Clarified that one accepted signature per CLA version covers all current and
+  future Conveyal open-source repositories, independently of workflow or refresh
+  enrollment. Made the general setup guide repository-neutral.
 
 ## v0.0.1 — 2026-10-08
 

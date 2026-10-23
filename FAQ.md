@@ -10,7 +10,9 @@ does not cover unrelated EBP projects outside that organization.
 ### Who signs?
 
 Every human author of a new pull request must be covered. Individuals sign once
-for the organization-wide program. A corporate representative may authorize a
+per CLA version for all open-source repositories in the Conveyal GitHub organization,
+including future repositories. Separate signatures for each repository are not
+required. A corporate representative may authorize a
 set of GitHub account IDs through a corporate record.
 
 ### How do I sign?
