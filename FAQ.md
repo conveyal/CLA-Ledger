@@ -51,5 +51,4 @@ past contributions remain under the version accepted at the time.
 
 ### Is this final legal text?
 
-No. The initial agreement is a clearly marked provisional implementation draft
-pending counsel review.
+Yes. CLA `v1.0` is complete. Future material changes require a new version.

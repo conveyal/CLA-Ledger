@@ -45,7 +45,7 @@ pull requests and pushes to `main`. It sets up pnpm and Node.js from
   supplies corporate coverage for that version.
 - The contribution check reads only records already present on the trusted base
   branch and exempts GitHub accounts whose API type is `Bot`.
-- CLA text is provisional until legal review. A material revision gets a new
+- CLA v1.0 is complete. A material revision gets a new
   immutable version and does not rewrite historical signatures.
 
 ## Using the ledger from another repository
@@ -66,7 +66,7 @@ See [RELEASING.md](RELEASING.md) to publish a tooling release. Tooling releases
 are independent of CLA agreement versions. New accepted signatures become
 available through ledger data at `main` without a tooling release.
 
-The current provisional agreement is `v0.1`; the first tooling release is
+The current agreement is `v1.0`; the first tooling release is
 planned as `v0.0.1`. These version numbers are independent. The
 [editor-link prototype](EDITOR_PROTOTYPE.md) records the successful maintainer
 browser test and the remaining outsider-fork test. Consumers can enable

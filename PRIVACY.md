@@ -11,4 +11,4 @@ Contributors who do not want a personal email in public git history should use
 a chosen commit name and a GitHub noreply address.
 
 Records are retained as evidence of a perpetual grant. Questions about the
-provisional agreement or data handling should go to Conveyal maintainers.
+agreement or data handling should go to Conveyal maintainers.

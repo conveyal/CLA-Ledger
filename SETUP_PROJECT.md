@@ -14,7 +14,7 @@ need an npm package, a signing helper, or a local copy of the signature records.
 1. Publish an immutable tooling release in `conveyal/CLA-Ledger` using [RELEASING.md](RELEASING.md).
 2. Verify that the public `main` branch contains `cla/config.json`, `versions/CURRENT`, and the corresponding agreement file.
 3. Verify that `.github/workflows/cla.yml` runs and accepts a valid signature PR through maintainer review.
-4. Use the current provisional agreement `v0.1` pending legal review. A counsel-reviewed material change will receive a new version; retain all accepted records.
+4. Use the completed agreement `v1.0`. A material change requires a new version; retain all accepted records.
 5. Merge current-version records for the maintainers who will exercise the R5 check.
 
 Individual and corporate records both supply coverage. An open signature PR

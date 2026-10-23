@@ -1,9 +1,8 @@
-# Conveyal Contributor License Agreement (v0.1 — provisional)
+# Conveyal Contributor License Agreement (v1.0)
 
-**Provisional implementation draft — legal review pending.** This agreement is
-intended for Conveyal LLC's organization-wide open-source projects, including
-R5. It is adapted from the Cloud Security Alliance CLA-Ledger and is not legal
-advice.
+This agreement is intended for Conveyal LLC's organization-wide open-source
+projects, including R5. It is adapted from the Cloud Security Alliance CLA-Ledger
+and is not legal advice.
 
 Thank you for contributing to Conveyal's open-source projects. This Contributor
 License Agreement ("Agreement") records the rights you grant to Conveyal LLC
@@ -79,6 +78,6 @@ Material changes receive a new version and require a new record for future
 Contributions; prior records and grants remain effective under their signed
 version.
 
-No governing-law or venue clause is included in this provisional version. Any
+No governing-law or venue clause is included in this version. Any
 such clause will be introduced only through a counsel-reviewed material
 version.
