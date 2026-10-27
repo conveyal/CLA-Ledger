@@ -23,12 +23,13 @@ import * as runCheck from "./run_check.ts";
 import * as refreshProjects from "./refresh_projects.ts";
 // Capture repository paths before sandboxed tests switch the process to temporary ledger checkouts.
 const repositoryRoot = process.cwd();
+const fixtureVersion = helpers.currentVersion(repositoryRoot);
 const script = path.resolve("sign.ts");
 // Keep fixtures until suite teardown so nested tests can share a ledger safely.
 const temporaryRoots: string[] = [];
 const config = { cla_root: ".", ledger_blob: "https://example.test/blob", organization_name: "EBP US Inc." };
-const individualPath = "signatures/v1.0/individual/1.md";
-const corporatePath = "signatures/v1.0/corporate/acme/0001.md";
+const individualPath = `signatures/${fixtureVersion}/individual/1.md`;
+const corporatePath = `signatures/${fixtureVersion}/corporate/acme/0001.md`;
 
 // No offline test may accidentally fall through to a live API request.
 test.beforeEach((t) => {
@@ -52,13 +53,13 @@ function fixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "cla-test-"));
   temporaryRoots.push(root);
   write(root, "cla/config.json", JSON.stringify(config));
-  write(root, "versions/CURRENT", "v1.0\n");
-  write(root, "versions/CLA-v1.0.md", fs.readFileSync(path.join(repositoryRoot, "versions/CLA-v1.0.md")));
+  write(root, "versions/CURRENT", `${fixtureVersion}\n`);
+  write(root, `versions/CLA-${fixtureVersion}.md`, fs.readFileSync(path.join(repositoryRoot, `versions/CLA-${fixtureVersion}.md`)));
   return root;
 }
 
 /** Build a valid synthetic record so each test can alter one identity, template, or coverage constraint. */
-function record(root: string, version = "v1.0", corporate = false, authorized = ["3", "10"]) {
+function record(root: string, version = fixtureVersion, corporate = false, authorized = ["3", "10"]) {
   const agreement = helpers.canonical(root, version);
   const block = corporate
     ? sign.buildCorporate(config, "octocat", "1", "acme", authorized, version, "2020-01-01")
@@ -165,7 +166,7 @@ function runSign(root: string, args: string[], extra: Omit<SpawnSyncOptionsWithS
 
 test("current versions and dates are validated", () => {
   const root = fixture();
-  assert.equal(helpers.currentVersion(root), "v1.0");
+  assert.equal(helpers.currentVersion(root), fixtureVersion);
   assert.equal(helpers.validDate("2020-01-01"), true);
   assert.equal(helpers.validDate("2020-02-30"), false);
   assert.equal(helpers.validDate("not-a-date"), false);
@@ -201,38 +202,38 @@ test("the agreement explicitly covers all current and future open-source reposit
 test("individual and corporate validators reject signature scope outside the Conveyal organization", () => {
   for (const corporate of [false, true]) {
     const root = fixture();
-    const agreement = helpers.canonical(root, "v1.0");
-    const text = record(root, "v1.0", corporate);
+    const agreement = helpers.canonical(root, fixtureVersion);
+    const text = record(root, fixtureVersion, corporate);
     const validateRecord = (value: string) => corporate
-      ? validate.corporateError(value, agreement, "v1.0", "octocat", "1", "acme")
-      : validate.individualError(value, agreement, "v1.0", "octocat", "1");
+      ? validate.corporateError(value, agreement, fixtureVersion, "octocat", "1", "acme")
+      : validate.individualError(value, agreement, fixtureVersion, "octocat", "1");
     assert.equal(validateRecord(text), null);
     for (const scope of ["EBP's organization-wide open-source projects", "Conveyal's organization-wide open-source projects"]) {
       const altered = text.replace("for open-source projects in the Conveyal GitHub organization.", `for ${scope}.`);
       assert.notEqual(altered, text);
       assert.notEqual(validateRecord(altered), null);
       write(root, corporate ? corporatePath : individualPath, altered);
-      assert.deepEqual(helpers.records(root, "v1.0"), new Set());
+      assert.deepEqual(helpers.records(root, fixtureVersion), new Set());
     }
   }
 });
 
 test("editor links round-trip the complete canonical record and pass signer validation", () => {
   const settings = { ...config, ledger_blob: "https://github.com/conveyal/cla-test/blob/main" };
-  const agreement = `${helpers.canonical(fixture(), "v1.0")}\n\nFormatting: ✓ + & # %\n\n`;
-  const prepared = individualRecord(settings, agreement, "octocat", "1", "v1.0", "2020-01-01");
+  const agreement = `${helpers.canonical(fixture(), fixtureVersion)}\n\nFormatting: ✓ + & # %\n\n`;
+  const prepared = individualRecord(settings, agreement, "octocat", "1", fixtureVersion, "2020-01-01");
   const url = new URL(individualEditorUrl(settings, prepared));
   assert.equal(url.origin, "https://github.com");
   assert.equal(url.pathname, "/conveyal/cla-test/new/main");
   assert.equal(url.searchParams.get("filename"), individualPath);
   assert.equal(url.searchParams.get("value"), prepared.text);
-  assert.equal(validate.individualError(prepared.text, agreement.trimEnd(), "v1.0", "octocat", "1", helpers.recordLink(settings, "v1.0")), null);
-  assert.notEqual(validate.individualError(prepared.text, agreement.trimEnd(), "v1.0", "someone-else", "2"), null);
+  assert.equal(validate.individualError(prepared.text, agreement.trimEnd(), fixtureVersion, "octocat", "1", helpers.recordLink(settings, fixtureVersion)), null);
+  assert.notEqual(validate.individualError(prepared.text, agreement.trimEnd(), fixtureVersion, "someone-else", "2"), null);
 });
 
 test("editor links preserve nested ledger paths and reject unsafe destinations", () => {
   const settings = { ...config, cla_root: "cla", ledger_blob: "https://github.com/conveyal/cla-test/blob/main/" };
-  const record = individualRecord(settings, "Agreement", "octocat", "1", "v1.0", "2020-01-01");
+  const record = individualRecord(settings, "Agreement", "octocat", "1", fixtureVersion, "2020-01-01");
   const safe = { ...settings, ledger_blob: settings.ledger_blob.replace(/\/$/, "") };
   assert.equal(new URL(individualEditorUrl(safe, record)).searchParams.get("filename"), `cla/${individualPath}`);
   for (const ledger_blob of ["https://evil.test/o/r/blob/main", "https://github.com/o/r/blob/main?value=x", "https://github.com/o/r/blob/main#x", "https://github.com/o/r/blob/feature/branch"]) {
@@ -244,61 +245,61 @@ test("editor links preserve nested ledger paths and reject unsafe destinations",
 
 test("generated individual records reject invalid identities, versions, dates, and empty agreements", () => {
   for (const args of [
-    ["bad\nlogin", "1", "v1.0", "2020-01-01"],
-    ["octocat", "0", "v1.0", "2020-01-01"],
-    ["octocat", "1", "../../v1.0", "2020-01-01"],
-    ["octocat", "1", "v1.0", "2999-01-01"],
+    ["bad\nlogin", "1", fixtureVersion, "2020-01-01"],
+    ["octocat", "0", fixtureVersion, "2020-01-01"],
+    ["octocat", "1", `../../${fixtureVersion}`, "2020-01-01"],
+    ["octocat", "1", fixtureVersion, "2999-01-01"],
   ]) {
     assert.throws(() => individualRecord(config, "Agreement", args[0], args[1], args[2], args[3]));
   }
-  assert.throws(() => individualRecord(config, " ", "octocat", "1", "v1.0", "2020-01-01"), /empty/);
+  assert.throws(() => individualRecord(config, " ", "octocat", "1", fixtureVersion, "2020-01-01"), /empty/);
 });
 
 test("individual coverage requires canonical text, matching identity, link, version, and date", () => {
   const root = fixture();
   const text = record(root);
-  const agreement = helpers.canonical(root, "v1.0");
+  const agreement = helpers.canonical(root, fixtureVersion);
   write(root, individualPath, text);
-  assert.deepEqual(helpers.records(root, "v1.0"), new Set(["1"]));
-  assert.equal(validate.individualError(text, agreement, "v1.0", "octocat", "1"), null);
+  assert.deepEqual(helpers.records(root, fixtureVersion), new Set(["1"]));
+  assert.equal(validate.individualError(text, agreement, fixtureVersion, "octocat", "1"), null);
   for (const invalid of [
     text.replace("GitHub login: octocat", "GitHub login: someone-else"),
     text.replace("GitHub account ID: 1", "GitHub account ID: 2"),
     text.replace("https://example.test/blob", "https://invalid.test/blob"),
-    text.replace("CLA version: v1.0", "CLA version: v0.0"),
+    text.replace(`CLA version: ${fixtureVersion}`, "CLA version: v0.0"),
     text.replace("2020-01-01", "2999-01-01"),
     text.replace(agreement, "tampered agreement"),
     text + "tampered",
   ]) {
     write(root, individualPath, invalid);
-    assert.deepEqual(helpers.records(root, "v1.0"), new Set());
+    assert.deepEqual(helpers.records(root, fixtureVersion), new Set());
   }
 });
 
 test("corporate coverage requires the matching slug and sorted authorized IDs", () => {
   const root = fixture();
-  const text = record(root, "v1.0", true);
+  const text = record(root, fixtureVersion, true);
   write(root, corporatePath, text);
-  assert.deepEqual(helpers.records(root, "v1.0"), new Set(["1", "3", "10"]));
-  const agreement = helpers.canonical(root, "v1.0");
-  assert.equal(validate.corporateError(text, agreement, "v1.0", "octocat", "1", "acme"), null);
-  const error = validate.corporateError(text, agreement, "v1.0", "octocat", "1", "other");
+  assert.deepEqual(helpers.records(root, fixtureVersion), new Set(["1", "3", "10"]));
+  const agreement = helpers.canonical(root, fixtureVersion);
+  assert.equal(validate.corporateError(text, agreement, fixtureVersion, "octocat", "1", "acme"), null);
+  const error = validate.corporateError(text, agreement, fixtureVersion, "octocat", "1", "other");
   assert.ok(error);
   assert.match(error, /exactly match/);
   write(root, corporatePath, text.replace("1, 3, 10", "10, 3, 1"));
-  assert.deepEqual(helpers.records(root, "v1.0"), new Set());
+  assert.deepEqual(helpers.records(root, fixtureVersion), new Set());
 });
 
 test("only the latest corporate snapshot supplies coverage, with no fallback if malformed", () => {
   const root = fixture();
-  const original = record(root, "v1.0", true, ["3", "10"]);
+  const original = record(root, fixtureVersion, true, ["3", "10"]);
   write(root, corporatePath, original);
-  write(root, "signatures/v1.0/corporate/acme/0002.md", record(root, "v1.0", true, ["4"]));
-  write(root, "signatures/v1.0/individual/3.md", record(root).replaceAll("account ID: 1", "account ID: 3"));
-  assert.deepEqual(helpers.records(root, "v1.0"), new Set(["1", "3", "4"]));
+  write(root, `signatures/${fixtureVersion}/corporate/acme/0002.md`, record(root, fixtureVersion, true, ["4"]));
+  write(root, `signatures/${fixtureVersion}/individual/3.md`, record(root).replaceAll("account ID: 1", "account ID: 3"));
+  assert.deepEqual(helpers.records(root, fixtureVersion), new Set(["1", "3", "4"]));
   assert.equal(fs.readFileSync(path.join(root, corporatePath), "utf8"), original);
-  write(root, "signatures/v1.0/corporate/acme/0002.md", "malformed newest snapshot");
-  assert.deepEqual(helpers.records(root, "v1.0"), new Set(["3"]));
+  write(root, `signatures/${fixtureVersion}/corporate/acme/0002.md`, "malformed newest snapshot");
+  assert.deepEqual(helpers.records(root, fixtureVersion), new Set(["3"]));
 });
 
 test("record symlinks cannot provide coverage", () => {
@@ -306,7 +307,7 @@ test("record symlinks cannot provide coverage", () => {
   write(root, "outside.md", record(root));
   fs.mkdirSync(path.dirname(path.join(root, individualPath)), { recursive: true });
   fs.symlinkSync(path.join(root, "outside.md"), path.join(root, individualPath));
-  assert.throws(() => helpers.records(root, "v1.0"), /regular file/);
+  assert.throws(() => helpers.records(root, fixtureVersion), /regular file/);
 });
 
 test("signature validation accepts new records for root and nested ledger paths", async (t) => {
@@ -314,8 +315,8 @@ test("signature validation accepts new records for root and nested ledger paths"
     await t.test(prefix || "root", async (t) => {
       const root = fixture();
       if (prefix) {
-        write(root, "cla/versions/CURRENT", "v1.0\n");
-        write(root, "cla/versions/CLA-v1.0.md", helpers.canonical(root, "v1.0"));
+        write(root, "cla/versions/CURRENT", `${fixtureVersion}\n`);
+        write(root, `cla/versions/CLA-${fixtureVersion}.md`, helpers.canonical(root, fixtureVersion));
         write(root, "cla/config.json", JSON.stringify({ ...config, cla_root: "cla" }));
       }
       const text = record(root).replace("/blob/versions/", `/blob/${prefix}versions/`);
@@ -376,7 +377,7 @@ test("one accepted record supplies coverage across consumer repositories without
       const root = fixture();
       sandbox(t, root);
       const recordPath = corporate ? corporatePath : individualPath;
-      const text = record(root, "v1.0", corporate);
+      const text = record(root, fixtureVersion, corporate);
       write(root, recordPath, text);
       for (const repo of ["conveyal/example-existing", "conveyal/example-new"]) {
         await t.test(repo, async (t) => {
@@ -533,15 +534,15 @@ test("renames into signatures never receive the contributor exemption", async (t
 
 test("signature path, account, record version, and current version must agree", async (t) => {
   for (const [filename, version] of [
-    ["signatures/v0.0/individual/1.md", "v1.0"],
+    ["signatures/v0.0/individual/1.md", fixtureVersion],
     [individualPath, "v0.0"],
-    ["signatures/v1.0/individual/2.md", "v1.0"],
-    ["signatures/individual/1.md", "v1.0"],
+    [`signatures/${fixtureVersion}/individual/2.md`, fixtureVersion],
+    ["signatures/individual/1.md", fixtureVersion],
   ]) {
     await t.test(`${filename} ${version}`, async (t) => {
       const root = fixture();
       sandbox(t, root);
-      mockPR(t, { files: [{ filename, status: "added" }], record: record(root).replace("CLA version: v1.0", `CLA version: ${version}`) });
+      mockPR(t, { files: [{ filename, status: "added" }], record: record(root).replace(`CLA version: ${fixtureVersion}`, `CLA version: ${version}`) });
       assert.equal(await validate.main(), 1);
     });
   }
@@ -552,9 +553,9 @@ test("corporate validation accepts only the next snapshot and preserves prior co
     await t.test(filename, async (t) => {
       const root = fixture();
       sandbox(t, root);
-      const original = record(root, "v1.0", true);
+      const original = record(root, fixtureVersion, true);
       write(root, corporatePath, original);
-      mockPR(t, { files: [{ filename: `signatures/v1.0/corporate/acme/${filename}`, status: "added" }], record: record(root, "v1.0", true, ["4"]) });
+      mockPR(t, { files: [{ filename: `signatures/${fixtureVersion}/corporate/acme/${filename}`, status: "added" }], record: record(root, fixtureVersion, true, ["4"]) });
       assert.equal(await validate.main(), filename === "0002.md" ? 0 : 1);
       assert.equal(fs.readFileSync(path.join(root, corporatePath), "utf8"), original);
     });
@@ -566,18 +567,18 @@ test("a PR cannot add multiple snapshots for the same organization and version",
   sandbox(t, root);
   mockPR(t, { files: [
     { filename: corporatePath, status: "added" },
-    { filename: "signatures/v1.0/corporate/acme/0002.md", status: "added" },
-  ], record: record(root, "v1.0", true) });
+    { filename: `signatures/${fixtureVersion}/corporate/acme/0002.md`, status: "added" },
+  ], record: record(root, fixtureVersion, true) });
   assert.equal(await validate.main(), 1);
 });
 
 test("corporate snapshot numbering and coverage remain numeric beyond four digits", () => {
   const root = fixture();
-  const directory = "signatures/v1.0/corporate/acme";
-  write(root, `${directory}/9999.md`, record(root, "v1.0", true, ["3"]));
+  const directory = `signatures/${fixtureVersion}/corporate/acme`;
+  write(root, `${directory}/9999.md`, record(root, fixtureVersion, true, ["3"]));
   assert.equal(helpers.nextCorporateSnapshot(path.join(root, directory)), "10000.md");
-  write(root, `${directory}/10000.md`, record(root, "v1.0", true, ["4"]));
-  assert.deepEqual(helpers.records(root, "v1.0"), new Set(["1", "4"]));
+  write(root, `${directory}/10000.md`, record(root, fixtureVersion, true, ["4"]));
+  assert.deepEqual(helpers.records(root, fixtureVersion), new Set(["1", "4"]));
 });
 
 test("signature validation rejects symlinks and truncated head trees", async (t) => {
@@ -632,7 +633,7 @@ test("invalid configuration cannot supply coverage", () => {
   const root = fixture();
   write(root, individualPath, record(root));
   write(root, "cla/config.json", JSON.stringify({ ...config, ledger_blob: 42 }));
-  assert.throws(() => helpers.records(root, "v1.0"), /nonempty strings/);
+  assert.throws(() => helpers.records(root, fixtureVersion), /nonempty strings/);
 });
 
 test("pagination reads every page", async (t) => {
@@ -675,20 +676,20 @@ test("argument parsing supports prompting, flags, and rejects force", () => {
 
 test("signing CLI supports prompted, nested, and non-interactive modes", () => {
   const root = fixture();
-  write(root, "cla/versions/CURRENT", "v1.0\n");
-  write(root, "cla/versions/CLA-v1.0.md", helpers.canonical(root, "v1.0"));
+  write(root, "cla/versions/CURRENT", `${fixtureVersion}\n`);
+  write(root, `cla/versions/CLA-${fixtureVersion}.md`, helpers.canonical(root, fixtureVersion));
   write(root, "cla/config.json", JSON.stringify({ ...config, cla_root: "cla" }));
   const prompted = runSign(root, ["--id", "123"], {
     input: "octocat\nindividual\n", env: { ...process.env, CLA_PROMPT: "1" },
   });
   assert.equal(prompted.status, 0, prompted.stderr);
-  assert.ok(fs.existsSync(path.join(root, "cla/signatures/v1.0/individual/123.md")));
+  assert.ok(fs.existsSync(path.join(root, `cla/signatures/${fixtureVersion}/individual/123.md`)));
   const noArgs = runSign(root, [], { input: "octocat\nindividual\n124\n", env: { ...process.env, CLA_PROMPT: "1" } });
   assert.equal(noArgs.status, 0, noArgs.stderr);
-  assert.ok(fs.existsSync(path.join(root, "cla/signatures/v1.0/individual/124.md")));
+  assert.ok(fs.existsSync(path.join(root, `cla/signatures/${fixtureVersion}/individual/124.md`)));
   const explicit = runSign(root, ["octocat", "--id", "125", "--individual"]);
   assert.equal(explicit.status, 0, explicit.stderr);
-  assert.ok(fs.existsSync(path.join(root, "cla/signatures/v1.0/individual/125.md")));
+  assert.ok(fs.existsSync(path.join(root, `cla/signatures/${fixtureVersion}/individual/125.md`)));
   const missing = runSign(root, [], { input: "" });
   assert.equal(missing.status, 1);
   assert.match(missing.stderr, /missing required arguments/);
@@ -714,6 +715,8 @@ test("editor-url CLI is read-only and uses the same record as file generation", 
 
 test("signing a newer version preserves the original bytes and older records do not cover it", () => {
   const root = fixture();
+  const [major, minor] = fixtureVersion.slice(1).split(".").map(Number);
+  const newerVersion = `v${major}.${minor + 1}`;
   const args = ["octocat", "--id", "1", "--individual"];
   let result = runSign(root, args);
   assert.equal(result.status, 0, result.stderr);
@@ -722,15 +725,15 @@ test("signing a newer version preserves the original bytes and older records do 
   assert.equal(result.status, 1);
   assert.match(result.stderr, /append-only/);
   assert.deepEqual(fs.readFileSync(path.join(root, individualPath)), original);
-  write(root, "versions/CLA-v1.1.md", helpers.canonical(root, "v1.0").replaceAll("(v1.0)", "(v1.1)"));
-  write(root, "versions/CURRENT", "v1.1\n");
-  assert.deepEqual(helpers.records(root, "v1.1"), new Set());
+  write(root, `versions/CLA-${newerVersion}.md`, helpers.canonical(root, fixtureVersion).replaceAll(`(${fixtureVersion})`, `(${newerVersion})`));
+  write(root, "versions/CURRENT", `${newerVersion}\n`);
+  assert.deepEqual(helpers.records(root, newerVersion), new Set());
   result = runSign(root, args);
   assert.equal(result.status, 0, result.stderr);
   assert.deepEqual(fs.readFileSync(path.join(root, individualPath)), original);
-  assert.ok(fs.existsSync(path.join(root, "signatures/v1.1/individual/1.md")));
-  assert.deepEqual(helpers.records(root, "v1.1"), new Set(["1"]));
-  assert.deepEqual(helpers.records(root, "v1.0"), new Set(["1"]));
+  assert.ok(fs.existsSync(path.join(root, `signatures/${newerVersion}/individual/1.md`)));
+  assert.deepEqual(helpers.records(root, newerVersion), new Set(["1"]));
+  assert.deepEqual(helpers.records(root, fixtureVersion), new Set(["1"]));
 });
 
 test("corporate CLI updates append snapshots and replace the current authorization set", () => {
@@ -742,8 +745,8 @@ test("corporate CLI updates append snapshots and replace the current authorizati
   result = runSign(root, [...args.slice(0, -1), "4"]);
   assert.equal(result.status, 0, result.stderr);
   assert.deepEqual(fs.readFileSync(path.join(root, corporatePath)), original);
-  assert.ok(fs.existsSync(path.join(root, "signatures/v1.0/corporate/acme/0002.md")));
-  assert.deepEqual(helpers.records(root, "v1.0"), new Set(["1", "4"]));
+  assert.ok(fs.existsSync(path.join(root, `signatures/${fixtureVersion}/corporate/acme/0002.md`)));
+  assert.deepEqual(helpers.records(root, fixtureVersion), new Set(["1", "4"]));
 });
 
 test("workflow wiring binds the trusted base and run head with separate ledger data", () => {
@@ -772,16 +775,16 @@ test("personalized comments preserve canonical records and stay within their siz
     const settings = { ...config, ledger_blob: "https://github.com/conveyal/cla-test/blob/main" };
     write(root, "cla/config.json", JSON.stringify(settings));
     const authors = Array.from({ length: 250 }, (_, i) => ({ login: `user-${i}`, id: String(i + 1) }));
-    const lines = check.signingLines(root, "v1.0", authors, 30000);
+    const lines = check.signingLines(root, fixtureVersion, authors, 30000);
     assert.equal(lines.length, 250);
     assert.ok(lines.join("\n").length < 60000);
     assert.ok(lines.some((line) => line.includes("[Sign the CLA]")));
     assert.ok(lines.some((line) => line.includes("use the signing instructions")));
     const url = new URL(lines[0].match(/\[Sign the CLA\]\(([^)]+)\)/)?.[1] || "");
     assert.equal(url.searchParams.get("filename"), individualPath);
-    assert.equal(validate.individualError(url.searchParams.get("value") || "", helpers.canonical(root, "v1.0"), "v1.0", "user-0", "1", helpers.recordLink(settings, "v1.0")), null);
-    write(root, "versions/CLA-v1.0.md", "x".repeat(6000));
-    assert.doesNotMatch(check.signingLines(root, "v1.0", [authors[0]], 60000)[0], /\[Sign the CLA\]/);
+    assert.equal(validate.individualError(url.searchParams.get("value") || "", helpers.canonical(root, fixtureVersion), fixtureVersion, "user-0", "1", helpers.recordLink(settings, fixtureVersion)), null);
+    write(root, `versions/CLA-${fixtureVersion}.md`, "x".repeat(6000));
+    assert.doesNotMatch(check.signingLines(root, fixtureVersion, [authors[0]], 60000)[0], /\[Sign the CLA\]/);
   } finally { if (old === undefined) delete process.env.EDITOR_LINKS; else process.env.EDITOR_LINKS = old; }
 });
 
