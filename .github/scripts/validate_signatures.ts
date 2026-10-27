@@ -9,7 +9,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import {
-  api, claRoot, canonical, currentVersion, loadConfig, validDate,
+  api, pages, claRoot, canonical, currentVersion, loadConfig, validDate,
   pullRequest, assertPullRequestTarget, completePullRequestList, assertPullRequestUnchanged,
   nextCorporateSnapshot,
   isObject, errorMessage, type FileChange,
@@ -25,6 +25,30 @@ function env(name: string) {
 // Read these inputs on demand so imported helpers do not require a workflow environment.
 const repo = () => env("REPO");
 const pr = () => env("PR");
+
+/** Reuse the bot's validation comment, migrate old failures, and remove duplicate bot reports. */
+async function validationComment(body: string, create = false) {
+  const marker = "<!-- conveyal-cla-signature-validation -->";
+  try {
+    const comments = (await pages(`/repos/${repo()}/issues/${pr()}/comments`))
+      .filter((item): item is { id: number; body: string } => isObject(item)
+        && typeof item.id === "number" && typeof item.body === "string"
+        && isObject(item.user) && item.user.login === "github-actions[bot]"
+        && (item.body.startsWith(marker) || item.body.startsWith("CLA signature validation failed:\n")));
+    const existing = comments.find((item) => item.body.startsWith(marker)) || comments[0];
+    const payload = { body: `${marker}\n${body}` };
+    if (existing) {
+      await api(`/repos/${repo()}/issues/comments/${existing.id}`, "PATCH", payload);
+      for (const duplicate of comments) {
+        if (duplicate.id !== existing.id) await api(`/repos/${repo()}/issues/comments/${duplicate.id}`, "DELETE");
+      }
+    } else if (create) {
+      await api(`/repos/${repo()}/issues/${pr()}/comments`, "POST", payload);
+    }
+  } catch (error) {
+    console.error(`could not update validation comment: ${errorMessage(error)}`);
+  }
+}
 
 /** Git tree metadata needed to establish a record's file type and content identity. */
 interface TreeEntry {
@@ -165,6 +189,7 @@ async function main() {
   const files = changed.filter(touchesSignature);
   if (files.length === 0) {
     await assertPullRequestUnchanged(repo(), pr(), snapshot);
+    await validationComment("CLA signature validation passed: no signature records changed.");
     console.log("No CLA signature files changed.");
     return 0;
   }
@@ -220,15 +245,13 @@ async function main() {
   }
   if (errors.length > 0) {
     const body = `CLA signature validation failed:\n${errors.map((item) => `- ${item}`).join("\n")}`;
-    try {
-      await api(`/repos/${repo()}/issues/${pr()}/comments`, "POST", { body });
-    } catch (error) {
-      console.error(`could not post validation comment: ${errorMessage(error)}`);
-    }
+    await assertPullRequestUnchanged(repo(), pr(), snapshot);
+    await validationComment(body, true);
     console.error(body);
     return 1;
   }
   await assertPullRequestUnchanged(repo(), pr(), snapshot);
+  await validationComment("CLA signature validation passed.");
   console.log(`CLA record valid for @${author} (id ${authorId}).`);
   return 0;
 }

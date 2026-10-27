@@ -90,6 +90,7 @@ function sandbox(t: TestContext, root: string) {
 
 /** Overrides for complete PR fixtures, inconsistent metadata, changed revisions, and proposed record content. */
 interface MockPROptions {
+  comments?: { id: number; body: string; user: { login: string } }[];
   files?: helpers.FileChange[];
   commits?: helpers.Commit[];
   metadata?: Partial<helpers.PullRequestSnapshot>;
@@ -125,6 +126,7 @@ function mockPR(t: TestContext, options: MockPROptions = {}) {
   t.mock.method(global, "fetch", async (url: Parameters<typeof fetch>[0], request: RequestInit = {}) => {
     const parsed = new URL(String(url));
     requests.push({ url: String(url), method: request.method || "GET", body: request.body });
+    if (request.method === "DELETE") return new Response(null, { status: 204 });
     if (request.method === "POST" || request.method === "PATCH") return Response.json({});
     if (parsed.pathname === `/repos/${repo}/pulls/1`) {
       metadataReads += 1;
@@ -135,7 +137,10 @@ function mockPR(t: TestContext, options: MockPROptions = {}) {
       const start = (Number(parsed.searchParams.get("page")) - 1) * 100;
       return Response.json(items.slice(start, start + 100));
     }
-    if (parsed.pathname.endsWith("/comments")) return Response.json([]);
+    if (parsed.pathname.endsWith("/comments")) {
+      const start = (Number(parsed.searchParams.get("page")) - 1) * 100;
+      return Response.json((options.comments || []).slice(start, start + 100));
+    }
     if (parsed.pathname.includes("/git/trees/")) {
       return Response.json({ truncated: Boolean(options.truncatedTree), tree: files.map((file) => ({
         path: file.filename, mode: options.mode || "100644", type: "blob", sha: "blob-sha",
@@ -308,6 +313,64 @@ test("record symlinks cannot provide coverage", () => {
   fs.mkdirSync(path.dirname(path.join(root, individualPath)), { recursive: true });
   fs.symlinkSync(path.join(root, "outside.md"), path.join(root, individualPath));
   assert.throws(() => helpers.records(root, fixtureVersion), /regular file/);
+});
+
+test("signature validation maintains one bot comment and resolves legacy failures", async (t) => {
+  const marker = "<!-- conveyal-cla-signature-validation -->";
+  const bot = { login: "github-actions[bot]" };
+  for (const outcome of ["failure", "valid", "no records"]) {
+    for (const existing of ["none", "legacy", "marked"]) {
+      await t.test(`${outcome}, ${existing}`, async (t) => {
+        const root = fixture();
+        sandbox(t, root);
+        const human = { id: 1, body: "CLA signature validation failed: human quotation", user: { login: "octocat" } };
+        const coverage = { id: 2, body: "<!-- conveyal-cla-check -->\ncoverage", user: bot };
+        const old = { id: 3, body: "CLA signature validation failed:\nold error", user: bot };
+        const marked = { id: 4, body: `${marker}\nCLA signature validation failed:\nother error`, user: bot };
+        const comments = [human, coverage, ...(existing === "none" ? [] : [old]), ...(existing === "marked" ? [marked] : [])];
+        const { requests } = mockPR(t, {
+          comments,
+          files: outcome === "no records" ? [{ filename: "README.md", status: "modified" }] : undefined,
+          record: outcome === "failure" ? "invalid record" : record(root),
+        });
+        assert.equal(await validate.main(), outcome === "failure" ? 1 : 0);
+        const writes = requests.filter((request) => request.method !== "GET");
+        if (existing === "none" && outcome !== "failure") {
+          assert.equal(writes.length, 0);
+          return;
+        }
+        const update = writes.find((request) => request.method === (existing === "none" ? "POST" : "PATCH"));
+        assert.ok(update && typeof update.body === "string");
+        const body = JSON.parse(update.body).body;
+        assert.ok(body.startsWith(marker));
+        assert.match(body, outcome === "failure" ? /CLA signature validation failed:/ : /CLA signature validation passed/);
+        if (outcome !== "failure") assert.doesNotMatch(body, /old error|other error|validation failed/);
+        if (existing !== "none") assert.ok(update.url.endsWith(`/issues/comments/${existing === "marked" ? 4 : 3}`));
+        const deleted = writes.filter((request) => request.method === "DELETE");
+        assert.deepEqual(deleted.map((request) => request.url.split("/").at(-1)), existing === "marked" ? ["3"] : []);
+        assert.ok(writes.every((request) => !/\/comments\/[12]$/.test(request.url)));
+      });
+    }
+  }
+});
+
+test("stale signature runs cannot update validation comments", async (t) => {
+  for (const outcome of ["failure", "valid", "no records"]) {
+    await t.test(outcome, async (t) => {
+      const root = fixture();
+      sandbox(t, root);
+      const { requests } = mockPR(t, {
+        files: outcome === "no records" ? [{ filename: "README.md", status: "modified" }] : undefined,
+        record: outcome === "failure" ? "invalid record" : record(root),
+        latestMetadata: {
+          head: { sha: "new-head", repo: { full_name: "octocat/fork" } }, base: { sha: "base-sha" },
+          commits: 1, changed_files: 1,
+        },
+      });
+      await assert.rejects(validate.main, /changed during validation/);
+      assert.ok(requests.every((request) => request.method === "GET"));
+    });
+  }
 });
 
 test("signature validation excludes only the ledger README from record paths", async (t) => {
