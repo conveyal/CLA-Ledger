@@ -315,8 +315,8 @@ test("signature validation excludes only the ledger README from record paths", a
     await t.test(prefix || "root", async (t) => {
       const root = fixture();
       if (prefix) {
-        write(root, "cla/versions/CURRENT", "v0.1\n");
-        write(root, "cla/versions/CLA-v0.1.md", helpers.canonical(root, "v0.1"));
+        write(root, "cla/versions/CURRENT", `${fixtureVersion}\n`);
+        write(root, `cla/versions/CLA-${fixtureVersion}.md`, helpers.canonical(root, fixtureVersion));
         write(root, "cla/config.json", JSON.stringify({ ...config, cla_root: "cla" }));
       }
       sandbox(t, root);
@@ -336,13 +336,13 @@ test("the README exception cannot hide renamed or modified signature records", a
     for (const file of [
       { filename: `${prefix}signatures/README.md`, previous_filename: prefix + individualPath, status: "renamed" },
       { filename: prefix + individualPath, previous_filename: `${prefix}signatures/README.md`, status: "renamed" },
-      { filename: `${prefix}signatures/v0.1/README.md`, status: "modified" },
+      { filename: `${prefix}signatures/${fixtureVersion}/README.md`, status: "modified" },
     ]) {
       await t.test(JSON.stringify(file), async (t) => {
         const root = fixture();
         if (prefix) {
-          write(root, "cla/versions/CURRENT", "v0.1\n");
-          write(root, "cla/versions/CLA-v0.1.md", helpers.canonical(root, "v0.1"));
+          write(root, "cla/versions/CURRENT", `${fixtureVersion}\n`);
+          write(root, `cla/versions/CLA-${fixtureVersion}.md`, helpers.canonical(root, fixtureVersion));
           write(root, "cla/config.json", JSON.stringify({ ...config, cla_root: "cla" }));
         }
         sandbox(t, root);
