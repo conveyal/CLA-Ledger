@@ -2,11 +2,11 @@
   "name": "conveyal-cla-ledger",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@12.9.1",
+  "packageManager": "pnpm@12.15.0",
   "devEngines": {
     "runtime": {
       "name": "node",
-      "version": "^24.2.0",
+      "version": "^24.22.1",
       "onFail": "download"
     }
   },
