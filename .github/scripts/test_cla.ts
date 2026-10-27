@@ -310,6 +310,50 @@ test("record symlinks cannot provide coverage", () => {
   assert.throws(() => helpers.records(root, fixtureVersion), /regular file/);
 });
 
+test("signature validation excludes only the ledger README from record paths", async (t) => {
+  for (const prefix of ["", "cla/"]) {
+    await t.test(prefix || "root", async (t) => {
+      const root = fixture();
+      if (prefix) {
+        write(root, "cla/versions/CURRENT", "v0.1\n");
+        write(root, "cla/versions/CLA-v0.1.md", helpers.canonical(root, "v0.1"));
+        write(root, "cla/config.json", JSON.stringify({ ...config, cla_root: "cla" }));
+      }
+      sandbox(t, root);
+      process.env.CLA_ROOT = prefix ? "cla" : ".";
+      mockPR(t, { files: [
+        { filename: `${prefix}signatures/README.md`, status: "modified" },
+        { filename: "README.md", status: "modified" },
+        { filename: `${prefix}versions/CURRENT`, status: "modified" },
+      ] });
+      assert.equal(await validate.main(), 0);
+    });
+  }
+});
+
+test("the README exception cannot hide renamed or modified signature records", async (t) => {
+  for (const prefix of ["", "cla/"]) {
+    for (const file of [
+      { filename: `${prefix}signatures/README.md`, previous_filename: prefix + individualPath, status: "renamed" },
+      { filename: prefix + individualPath, previous_filename: `${prefix}signatures/README.md`, status: "renamed" },
+      { filename: `${prefix}signatures/v0.1/README.md`, status: "modified" },
+    ]) {
+      await t.test(JSON.stringify(file), async (t) => {
+        const root = fixture();
+        if (prefix) {
+          write(root, "cla/versions/CURRENT", "v0.1\n");
+          write(root, "cla/versions/CLA-v0.1.md", helpers.canonical(root, "v0.1"));
+          write(root, "cla/config.json", JSON.stringify({ ...config, cla_root: "cla" }));
+        }
+        sandbox(t, root);
+        process.env.CLA_ROOT = prefix ? "cla" : ".";
+        mockPR(t, { files: [file] });
+        assert.equal(await validate.main(), 1);
+      });
+    }
+  }
+});
+
 test("signature validation accepts new records for root and nested ledger paths", async (t) => {
   for (const prefix of ["", "cla/"]) {
     await t.test(prefix || "root", async (t) => {

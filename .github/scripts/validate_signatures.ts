@@ -158,8 +158,10 @@ async function main() {
   assertPullRequestTarget(snapshot);
   const changed = await completePullRequestList(repo(), pr(), snapshot, "files");
   // Inspect both paths so renaming a record out of signatures cannot bypass validation.
-  const touchesSignature = (file: FileChange) => file.filename.startsWith(signaturePrefix)
-    || Boolean(file.previous_filename?.startsWith(signaturePrefix));
+  const isSignaturePath = (filename: string) => filename.startsWith(signaturePrefix)
+    && filename !== `${signaturePrefix}README.md`;
+  const touchesSignature = (file: FileChange) => isSignaturePath(file.filename)
+    || Boolean(file.previous_filename && isSignaturePath(file.previous_filename));
   const files = changed.filter(touchesSignature);
   if (files.length === 0) {
     await assertPullRequestUnchanged(repo(), pr(), snapshot);
