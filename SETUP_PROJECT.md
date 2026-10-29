@@ -21,9 +21,8 @@ These steps configure enforcement, not agreement scope.
 4. Use the completed agreement `v1.0`. A material change requires a new version; retain all accepted records.
 5. Verify that the maintainers who will exercise the check have accepted current-version records in the central ledger.
 
-Individual and corporate records both supply coverage. An open signature PR
-supplies no coverage until a maintainer merges it. See the
-[signature instructions](signatures/README.md) for record generation and corporate updates.
+An open signature PR supplies no coverage until a maintainer merges it. See the
+[signature instructions](signatures/README.md) for record generation.
 
 Select a published release from the ledger's
 [Releases page](https://github.com/conveyal/CLA-Ledger/releases).

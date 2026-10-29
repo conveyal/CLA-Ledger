@@ -29,7 +29,6 @@ const script = path.resolve("sign.ts");
 const temporaryRoots: string[] = [];
 const config = { cla_root: ".", ledger_blob: "https://example.test/blob", organization_name: "EBP US Inc." };
 const individualPath = `signatures/${fixtureVersion}/individual/1.md`;
-const corporatePath = `signatures/${fixtureVersion}/corporate/acme/0001.md`;
 
 // No offline test may accidentally fall through to a live API request.
 test.beforeEach((t) => {
@@ -59,12 +58,9 @@ function fixture() {
 }
 
 /** Build a valid synthetic record so each test can alter one identity, template, or coverage constraint. */
-function record(root: string, version = fixtureVersion, corporate = false, authorized = ["3", "10"]) {
+function record(root: string, version = fixtureVersion) {
   const agreement = helpers.canonical(root, version);
-  const block = corporate
-    ? sign.buildCorporate(config, "octocat", "1", "acme", authorized, version, "2020-01-01")
-    : sign.buildIndividual(config, "octocat", "1", version, "2020-01-01");
-  return `${agreement}\n\n${block}`;
+  return `${agreement}\n\n${sign.buildIndividual(config, "octocat", "1", version, "2020-01-01")}`;
 }
 
 /**
@@ -200,26 +196,23 @@ test("the agreement explicitly covers all current and future open-source reposit
   assert.match(agreement, /including future additions/);
   assert.match(agreement, /One accepted signature per Agreement version covers all covered projects/);
   assert.match(agreement, /no separate repository signatures are required/);
-  assert.match(agreement, /Workflow and refresh enrollment do not limit\s+coverage/);
+  assert.match(agreement, /Workflow and refresh\s+enrollment do not limit\s+coverage/);
+  assert.doesNotMatch(agreement, /[Cc]orporate|authorized representative/);
   assert.doesNotMatch(agreement, /\bR5\b|organization-wide program/);
 });
 
-test("individual and corporate validators reject signature scope outside the Conveyal organization", () => {
-  for (const corporate of [false, true]) {
-    const root = fixture();
-    const agreement = helpers.canonical(root, fixtureVersion);
-    const text = record(root, fixtureVersion, corporate);
-    const validateRecord = (value: string) => corporate
-      ? validate.corporateError(value, agreement, fixtureVersion, "octocat", "1", "acme")
-      : validate.individualError(value, agreement, fixtureVersion, "octocat", "1");
-    assert.equal(validateRecord(text), null);
-    for (const scope of ["EBP's organization-wide open-source projects", "Conveyal's organization-wide open-source projects"]) {
-      const altered = text.replace("for open-source projects in the Conveyal GitHub organization.", `for ${scope}.`);
-      assert.notEqual(altered, text);
-      assert.notEqual(validateRecord(altered), null);
-      write(root, corporate ? corporatePath : individualPath, altered);
-      assert.deepEqual(helpers.records(root, fixtureVersion), new Set());
-    }
+test("validators reject signature scope outside the Conveyal organization", () => {
+  const root = fixture();
+  const agreement = helpers.canonical(root, fixtureVersion);
+  const text = record(root);
+  const validateRecord = (value: string) => validate.individualError(value, agreement, fixtureVersion, "octocat", "1");
+  assert.equal(validateRecord(text), null);
+  for (const scope of ["EBP's organization-wide open-source projects", "Conveyal's organization-wide open-source projects"]) {
+    const altered = text.replace("for open-source projects in the Conveyal GitHub organization.", `for ${scope}.`);
+    assert.notEqual(altered, text);
+    assert.notEqual(validateRecord(altered), null);
+    write(root, individualPath, altered);
+    assert.deepEqual(helpers.records(root, fixtureVersion), new Set());
   }
 });
 
@@ -279,32 +272,6 @@ test("individual coverage requires canonical text, matching identity, link, vers
     write(root, individualPath, invalid);
     assert.deepEqual(helpers.records(root, fixtureVersion), new Set());
   }
-});
-
-test("corporate coverage requires the matching slug and sorted authorized IDs", () => {
-  const root = fixture();
-  const text = record(root, fixtureVersion, true);
-  write(root, corporatePath, text);
-  assert.deepEqual(helpers.records(root, fixtureVersion), new Set(["1", "3", "10"]));
-  const agreement = helpers.canonical(root, fixtureVersion);
-  assert.equal(validate.corporateError(text, agreement, fixtureVersion, "octocat", "1", "acme"), null);
-  const error = validate.corporateError(text, agreement, fixtureVersion, "octocat", "1", "other");
-  assert.ok(error);
-  assert.match(error, /exactly match/);
-  write(root, corporatePath, text.replace("1, 3, 10", "10, 3, 1"));
-  assert.deepEqual(helpers.records(root, fixtureVersion), new Set());
-});
-
-test("only the latest corporate snapshot supplies coverage, with no fallback if malformed", () => {
-  const root = fixture();
-  const original = record(root, fixtureVersion, true, ["3", "10"]);
-  write(root, corporatePath, original);
-  write(root, `signatures/${fixtureVersion}/corporate/acme/0002.md`, record(root, fixtureVersion, true, ["4"]));
-  write(root, `signatures/${fixtureVersion}/individual/3.md`, record(root).replaceAll("account ID: 1", "account ID: 3"));
-  assert.deepEqual(helpers.records(root, fixtureVersion), new Set(["1", "3", "4"]));
-  assert.equal(fs.readFileSync(path.join(root, corporatePath), "utf8"), original);
-  write(root, `signatures/${fixtureVersion}/corporate/acme/0002.md`, "malformed newest snapshot");
-  assert.deepEqual(helpers.records(root, fixtureVersion), new Set(["3"]));
 });
 
 test("record symlinks cannot provide coverage", () => {
@@ -479,23 +446,18 @@ test("complete 250-commit PRs pass, including authors on the final page", async 
 });
 
 test("one accepted record supplies coverage across consumer repositories without refresh enrollment", async (t) => {
-  for (const corporate of [false, true]) {
-    await t.test(corporate ? "corporate authorization" : "individual signature", async (t) => {
-      const root = fixture();
-      sandbox(t, root);
-      const recordPath = corporate ? corporatePath : individualPath;
-      const text = record(root, fixtureVersion, corporate);
-      write(root, recordPath, text);
-      for (const repo of ["conveyal/example-existing", "conveyal/example-new"]) {
-        await t.test(repo, async (t) => {
-          process.env.REPO = repo;
-          const { requests } = mockPR(t, { files: [{ filename: "README.md", status: "modified" }] });
-          assert.equal(await check.main(), 0);
-          assert.ok(requests.some(({ url }) => new URL(url).pathname === `/repos/${repo}/pulls/1`));
-          assert.equal(fs.readFileSync(path.join(root, recordPath), "utf8"), text);
-          assert.equal(fs.existsSync(path.join(root, "cla/projects.json")), false);
-        });
-      }
+  const root = fixture();
+  sandbox(t, root);
+  const text = record(root);
+  write(root, individualPath, text);
+  for (const repo of ["conveyal/example-existing", "conveyal/example-new"]) {
+    await t.test(repo, async (t) => {
+      process.env.REPO = repo;
+      const { requests } = mockPR(t, { files: [{ filename: "README.md", status: "modified" }] });
+      assert.equal(await check.main(), 0);
+      assert.ok(requests.some(({ url }) => new URL(url).pathname === `/repos/${repo}/pulls/1`));
+      assert.equal(fs.readFileSync(path.join(root, individualPath), "utf8"), text);
+      assert.equal(fs.existsSync(path.join(root, "cla/projects.json")), false);
     });
   }
 });
@@ -655,37 +617,11 @@ test("signature path, account, record version, and current version must agree", 
   }
 });
 
-test("corporate validation accepts only the next snapshot and preserves prior coverage evidence", async (t) => {
-  for (const filename of ["0002.md", "0003.md", "0000.md"]) {
-    await t.test(filename, async (t) => {
-      const root = fixture();
-      sandbox(t, root);
-      const original = record(root, fixtureVersion, true);
-      write(root, corporatePath, original);
-      mockPR(t, { files: [{ filename: `signatures/${fixtureVersion}/corporate/acme/${filename}`, status: "added" }], record: record(root, fixtureVersion, true, ["4"]) });
-      assert.equal(await validate.main(), filename === "0002.md" ? 0 : 1);
-      assert.equal(fs.readFileSync(path.join(root, corporatePath), "utf8"), original);
-    });
-  }
-});
-
-test("a PR cannot add multiple snapshots for the same organization and version", async (t) => {
+test("signature validation rejects corporate record paths", async (t) => {
   const root = fixture();
   sandbox(t, root);
-  mockPR(t, { files: [
-    { filename: corporatePath, status: "added" },
-    { filename: `signatures/${fixtureVersion}/corporate/acme/0002.md`, status: "added" },
-  ], record: record(root, fixtureVersion, true) });
+  mockPR(t, { files: [{ filename: `signatures/${fixtureVersion}/corporate/acme/0001.md`, status: "added" }], record: record(root) });
   assert.equal(await validate.main(), 1);
-});
-
-test("corporate snapshot numbering and coverage remain numeric beyond four digits", () => {
-  const root = fixture();
-  const directory = `signatures/${fixtureVersion}/corporate/acme`;
-  write(root, `${directory}/9999.md`, record(root, fixtureVersion, true, ["3"]));
-  assert.equal(helpers.nextCorporateSnapshot(path.join(root, directory)), "10000.md");
-  write(root, `${directory}/10000.md`, record(root, fixtureVersion, true, ["4"]));
-  assert.deepEqual(helpers.records(root, fixtureVersion), new Set(["1", "4"]));
 });
 
 test("signature validation rejects symlinks and truncated head trees", async (t) => {
@@ -771,14 +707,12 @@ test("comment updates replace the existing marker comment", async (t) => {
   assert.match(update.body, /new body/);
 });
 
-test("argument parsing supports prompting, flags, and rejects force", () => {
-  assert.deepEqual(sign.parseArgs(["octocat", "--id", "1", "--authorized-id", "2", "--authorized-id", "3", "--corporate"]), {
-    authorizedIds: ["2", "3"], corporate: true, login: "octocat", id: "1",
-  });
-  const empty = sign.parseArgs([]);
-  assert.equal(empty.login, undefined);
-  assert.equal(empty.corporate, undefined);
-  assert.throws(() => sign.parseArgs(["--force"]), /Unknown option/);
+test("argument parsing supports prompting, flags, and rejects removed options", () => {
+  assert.deepEqual(sign.parseArgs(["octocat", "--id", "1"]), { login: "octocat", id: "1" });
+  assert.deepEqual(sign.parseArgs([]), {});
+  for (const option of ["--force", "--corporate", "--individual"]) {
+    assert.throws(() => sign.parseArgs([option]), /Unknown option/);
+  }
 });
 
 test("signing CLI supports prompted, nested, and non-interactive modes", () => {
@@ -787,14 +721,14 @@ test("signing CLI supports prompted, nested, and non-interactive modes", () => {
   write(root, `cla/versions/CLA-${fixtureVersion}.md`, helpers.canonical(root, fixtureVersion));
   write(root, "cla/config.json", JSON.stringify({ ...config, cla_root: "cla" }));
   const prompted = runSign(root, ["--id", "123"], {
-    input: "octocat\nindividual\n", env: { ...process.env, CLA_PROMPT: "1" },
+    input: "octocat\n", env: { ...process.env, CLA_PROMPT: "1" },
   });
   assert.equal(prompted.status, 0, prompted.stderr);
   assert.ok(fs.existsSync(path.join(root, `cla/signatures/${fixtureVersion}/individual/123.md`)));
-  const noArgs = runSign(root, [], { input: "octocat\nindividual\n124\n", env: { ...process.env, CLA_PROMPT: "1" } });
+  const noArgs = runSign(root, [], { input: "octocat\n124\n", env: { ...process.env, CLA_PROMPT: "1" } });
   assert.equal(noArgs.status, 0, noArgs.stderr);
   assert.ok(fs.existsSync(path.join(root, `cla/signatures/${fixtureVersion}/individual/124.md`)));
-  const explicit = runSign(root, ["octocat", "--id", "125", "--individual"]);
+  const explicit = runSign(root, ["octocat", "--id", "125"]);
   assert.equal(explicit.status, 0, explicit.stderr);
   assert.ok(fs.existsSync(path.join(root, `cla/signatures/${fixtureVersion}/individual/125.md`)));
   const missing = runSign(root, [], { input: "" });
@@ -805,7 +739,7 @@ test("signing CLI supports prompted, nested, and non-interactive modes", () => {
 test("editor-url CLI is read-only and uses the same record as file generation", () => {
   const root = fixture();
   write(root, "cla/config.json", JSON.stringify({ ...config, ledger_blob: "https://github.com/conveyal/cla-test/blob/main" }));
-  const args = ["octocat", "--id", "1", "--individual"];
+  const args = ["octocat", "--id", "1"];
   const link = runSign(root, [...args, "--editor-url"]);
   assert.equal(link.status, 0, link.stderr);
   assert.equal(fs.existsSync(path.join(root, "signatures")), false);
@@ -815,16 +749,13 @@ test("editor-url CLI is read-only and uses the same record as file generation", 
   const existing = runSign(root, [...args, "--editor-url"]);
   assert.equal(existing.status, 1);
   assert.match(existing.stderr, /already has a record/);
-  const corporate = runSign(root, ["octocat", "--id", "1", "--corporate", "--editor-url"]);
-  assert.equal(corporate.status, 1);
-  assert.match(corporate.stderr, /individual records only/);
 });
 
 test("signing a newer version preserves the original bytes and older records do not cover it", () => {
   const root = fixture();
   const [major, minor] = fixtureVersion.slice(1).split(".").map(Number);
   const newerVersion = `v${major}.${minor + 1}`;
-  const args = ["octocat", "--id", "1", "--individual"];
+  const args = ["octocat", "--id", "1"];
   let result = runSign(root, args);
   assert.equal(result.status, 0, result.stderr);
   const original = fs.readFileSync(path.join(root, individualPath));
@@ -841,19 +772,6 @@ test("signing a newer version preserves the original bytes and older records do 
   assert.ok(fs.existsSync(path.join(root, `signatures/${newerVersion}/individual/1.md`)));
   assert.deepEqual(helpers.records(root, newerVersion), new Set(["1"]));
   assert.deepEqual(helpers.records(root, fixtureVersion), new Set(["1"]));
-});
-
-test("corporate CLI updates append snapshots and replace the current authorization set", () => {
-  const root = fixture();
-  const args = ["octocat", "--id", "1", "--corporate", "--organization", "acme", "--authorized-id", "3"];
-  let result = runSign(root, args);
-  assert.equal(result.status, 0, result.stderr);
-  const original = fs.readFileSync(path.join(root, corporatePath));
-  result = runSign(root, [...args.slice(0, -1), "4"]);
-  assert.equal(result.status, 0, result.stderr);
-  assert.deepEqual(fs.readFileSync(path.join(root, corporatePath)), original);
-  assert.ok(fs.existsSync(path.join(root, `signatures/${fixtureVersion}/corporate/acme/0002.md`)));
-  assert.deepEqual(helpers.records(root, fixtureVersion), new Set(["1", "4"]));
 });
 
 test("workflow wiring binds the trusted base and run head with separate ledger data", () => {

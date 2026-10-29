@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Prepare an individual signature or corporate authorization with Node 24.2+ built-ins.
+ * Prepare an individual signature with Node 24.2+ built-ins.
  * Prepend the locally published agreement and create a new record without replacing existing history.
  * Account lookup and offline IDs prepare record text; the authenticated PR establishes the submitter's identity.
  * The workflow validator and maintainer review determine whether a proposed record enters the ledger.
@@ -10,7 +10,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import * as readline from "node:readline/promises";
 import { parseArgs as parseNodeArgs } from "node:util";
-import { nextCorporateSnapshot, errorMessage, isObject, parseConfig, type ClaConfig } from "./.github/scripts/cla.ts";
+import { errorMessage, isObject, parseConfig, type ClaConfig } from "./.github/scripts/cla.ts";
 import { buildIndividual, individualRecord, individualEditorUrl } from "./.github/scripts/signature_record.ts";
 
 /** Parsed signing choices; prompts fill missing values before record generation. */
@@ -18,9 +18,6 @@ interface SignArgs {
   login?: string;
   id?: string;
   version?: string;
-  organization?: string;
-  authorizedIds: string[];
-  corporate?: boolean;
   help?: boolean;
   editorUrl?: boolean;
 }
@@ -39,7 +36,7 @@ function loadConfig() {
 }
 
 /**
- * Parse CLI options and at most one positional login, preserving the last signing-type switch.
+ * Parse CLI options and at most one positional login.
  * A --config option sets CLA_CONFIG for the subsequent configuration load.
  */
 function parseArgs(argv: string[]): SignArgs {
@@ -49,41 +46,26 @@ function parseArgs(argv: string[]): SignArgs {
       args: argv,
       options: {
         help: { type: "boolean", short: "h" },
-        corporate: { type: "boolean" },
-        individual: { type: "boolean" },
         id: { type: "string" },
         version: { type: "string" },
-        organization: { type: "string" },
         config: { type: "string" },
         login: { type: "string" },
-        "authorized-id": { type: "string", multiple: true },
         "editor-url": { type: "boolean" },
       },
       allowPositionals: true,
-      tokens: true,
     });
   } catch (error) {
     fail(errorMessage(error));
   }
   if (parsed.positionals.length > 1) fail("only one GitHub login may be provided");
   if (parsed.values.config) process.env.CLA_CONFIG = parsed.values.config;
-  let corporate: boolean | undefined;
-  // Token order preserves the last-flag-wins behavior when both signing switches appear.
-  for (const token of parsed.tokens) {
-    if (token.kind === "option" && token.name === "corporate") corporate = true;
-    if (token.kind === "option" && token.name === "individual") corporate = false;
-  }
-  const result: SignArgs = {
-    authorizedIds: parsed.values["authorized-id"] || [],
-  };
+  const result: SignArgs = {};
   const login = parsed.values.login || parsed.positionals[0];
-  if (corporate !== undefined) result.corporate = corporate;
   if (parsed.values.help) result.help = true;
   if (parsed.values["editor-url"]) result.editorUrl = true;
   if (login !== undefined) result.login = login;
   if (parsed.values.id !== undefined) result.id = parsed.values.id;
   if (parsed.values.version !== undefined) result.version = parsed.values.version;
-  if (parsed.values.organization !== undefined) result.organization = parsed.values.organization;
   return result;
 }
 
@@ -131,24 +113,13 @@ function numericId(value: string | undefined, label: string) {
 }
 
 /**
- * Build a corporate block with the representative included and authorized IDs deduplicated and numerically sorted.
- * Callers validate inputs and prepend the canonical agreement.
- */
-function buildCorporate(config: ClaConfig, login: string, id: string, organization: string, authorized: string[], version: string, date: string) {
-  const prefix = config.cla_root === "." ? "" : `${config.cla_root}/`;
-  const link = `${config.ledger_blob}/${prefix}versions/CLA-${version}.md`;
-  const ids = [...new Set([...authorized, id])].sort((a, b) => BigInt(a) < BigInt(b) ? -1 : BigInt(a) > BigInt(b) ? 1 : 0);
-  return `---\n\n## Corporate Authorization\n\nI, @${login} (GitHub account ID: ${id}), confirm that I am authorized\nto accept the [Conveyal Contributor License Agreement, version ${version.slice(1)}](${link})\non behalf of the organization \`${organization}\` for the authorized GitHub\naccounts listed below, for open-source projects in the Conveyal GitHub organization.\n\n- Organization: ${organization}\n- Representative GitHub login: ${login}\n- Representative GitHub account ID: ${id}\n- Authorized GitHub account IDs: ${ids.join(", ")}\n- CLA version: ${version}\n- Signature type: corporate\n- Date: ${date}\n`;
-}
-
-/**
  * Fill missing signing choices in place when a terminal or explicit CLA_PROMPT input is available.
- * Noninteractive callers must supply a login and signing type; later validation checks the remaining fields.
+ * Noninteractive callers must supply a login; later validation checks the remaining fields.
  */
 async function promptForMissing(args: SignArgs) {
   const interactive = Boolean(process.stdin.isTTY || process.env.CLA_PROMPT === "1");
-  if (!interactive && (!args.login || args.corporate === undefined)) {
-    fail("missing required arguments; run in a terminal to be prompted or provide login and signing type");
+  if (!interactive && !args.login) {
+    fail("missing required arguments; run in a terminal to be prompted or provide a login");
   }
   if (!interactive) return args;
   // Read explicit piped answers upfront; readline can otherwise consume lines before later questions register.
@@ -171,19 +142,7 @@ async function promptForMissing(args: SignArgs) {
   };
   try {
     args.login ||= await ask("GitHub login");
-    if (args.corporate === undefined) {
-      const type = (await ask("Signing type (individual/corporate)", "individual")).toLowerCase();
-      if (!["individual", "corporate"].includes(type)) fail("signing type must be individual or corporate");
-      args.corporate = type === "corporate";
-    }
     args.id ||= await ask("GitHub account ID (leave blank to look it up)");
-    if (args.corporate) {
-      args.organization ||= await ask("Organization slug");
-      if (args.authorizedIds.length === 0) {
-        const list = await ask("Authorized GitHub account IDs (comma-separated)");
-        args.authorizedIds = list ? list.split(",").map((item) => item.trim()).filter(Boolean) : [];
-      }
-    }
     return args;
   } finally {
     if (input) input.close();
@@ -194,7 +153,7 @@ async function promptForMissing(args: SignArgs) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
-    console.log("Usage: node sign.ts [login] [--id ID] [--individual | --corporate --organization SLUG --authorized-id ID] [--version VERSION] [--editor-url]");
+    console.log("Usage: node sign.ts [login] [--id ID] [--version VERSION] [--editor-url]");
     return 0;
   }
   const config = loadConfig();
@@ -214,30 +173,18 @@ async function main() {
   id = numericId(id, "account ID");
   const version = currentVersion(config, args.version);
   const date = new Date().toISOString().slice(0, 10);
-  const organization = args.organization || "";
-  if (args.editorUrl && args.corporate) fail("--editor-url supports individual records only");
-  const individual = args.corporate ? undefined : individualRecord(config, canonical(config, version), login, id, version, date);
+  const individual = individualRecord(config, canonical(config, version), login, id, version, date);
   if (args.editorUrl) {
-    if (!individual) fail("an individual record is required");
     if (fs.existsSync(path.join(config.cla_root, individual.path))) fail("this account already has a record for the selected version");
     console.log(individualEditorUrl(config, individual));
     return 0;
   }
-  if (args.corporate && !/^[a-z0-9][a-z0-9._-]*$/.test(organization)) fail("organization must be a lowercase GitHub slug");
-  const corporateDirectory = path.join(config.cla_root, "signatures", version, "corporate", organization);
-  // Corporate updates add numbered snapshots; individual records are unique per account and CLA version.
-  const relative = args.corporate
-    ? path.join("signatures", version, "corporate", organization, nextCorporateSnapshot(corporateDirectory))
-    : path.join("signatures", version, "individual", `${id}.md`);
-  const authorized = (args.authorizedIds || []).map((value) => numericId(value, "authorized ID"));
-  const block = args.corporate
-    ? buildCorporate(config, login, id, organization, authorized, version, date)
-    : buildIndividual(config, login, id, version, date);
-  const output = path.join(config.cla_root, relative);
+  // Records are unique per account and CLA version.
+  const output = path.join(config.cla_root, individual.path);
   fs.mkdirSync(path.dirname(output), { recursive: true });
   try {
     // Exclusive creation protects existing records even if another process creates the path after selection.
-    fs.writeFileSync(output, individual?.text ?? `${canonical(config, version)}\n\n${block}`, { encoding: "utf8", flag: "wx" });
+    fs.writeFileSync(output, individual.text, { encoding: "utf8", flag: "wx" });
   } catch (error) {
     if (isObject(error) && error.code === "EEXIST") fail(`${output} already exists; records are append-only and cannot be replaced`);
     throw error;
@@ -255,4 +202,4 @@ if (import.meta.main) {
   });
 }
 
-export { parseArgs, currentVersion, buildIndividual, buildCorporate };
+export { parseArgs, currentVersion, buildIndividual };

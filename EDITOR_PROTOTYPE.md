@@ -52,16 +52,16 @@ browser test is required before relying on them for contributor onboarding.
 From a checkout with the desired ledger configuration and canonical text:
 
 ```sh
-node /path/to/CLA-Ledger/sign.ts trevorgerhardt --id 776780 --individual --editor-url
+node /path/to/CLA-Ledger/sign.ts trevorgerhardt --id 776780 --editor-url
 ```
 
 The current directory supplies `cla/config.json` and `versions/`. In the test
 repository, these point to the disposable fixture. In the real ledger, they
 point to the real agreement. Never generate a real signing link for a test.
 
-The CLI supports individual records only for this option. It refuses a link
-when the selected version already has a record for that ID. Opening the URL
-does not create a branch, commit, or PR; the contributor performs those actions.
+The CLI refuses a link when the selected version already has a record for that
+ID. Opening the URL does not create a branch, commit, or PR; the contributor
+performs those actions.
 
 ## Browser acceptance test
 

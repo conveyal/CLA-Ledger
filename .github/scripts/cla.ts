@@ -188,29 +188,6 @@ async function assertPullRequestUnchanged(repo: string, pr: string, snapshot: Pu
   }
 }
 
-/** Requires canonical positive snapshot filenames and sorts them by numeric sequence. */
-function corporateSnapshots(directory: string) {
-  const names = fs.existsSync(directory) ? fs.readdirSync(directory) : [];
-  for (const name of names) {
-    const number = name.match(/^(\d{4,})\.md$/)?.[1];
-    if (!number || BigInt(number) === 0n || String(BigInt(number)).padStart(4, "0") !== number) {
-      throw new Error(`Invalid corporate snapshot filename: ${name}`);
-    }
-  }
-  // Numeric order remains correct after the sequence grows beyond four digits.
-  return names.sort((left, right) => {
-    const a = BigInt(left.slice(0, -3));
-    const b = BigInt(right.slice(0, -3));
-    return a < b ? -1 : a > b ? 1 : 0;
-  });
-}
-
-/** Chooses the next local snapshot name; PR validation separately checks the trusted base. */
-function nextCorporateSnapshot(directory: string) {
-  const latest = BigInt(corporateSnapshots(directory).at(-1)?.slice(0, -3) || "0");
-  return `${String(latest + 1n).padStart(4, "0")}.md`;
-}
-
 /** Normalizes a relative ledger path and rejects empty paths or paths that contain '..'. */
 function claRoot(value = process.env.CLA_ROOT || "cla") {
   const root = String(value).replace(/^\/+|\/+$/g, "");
@@ -262,11 +239,6 @@ export function parseConfig(value: unknown, file: string): ClaConfig {
   return { ...value, cla_root: value.cla_root, ledger_blob: value.ledger_blob, organization_name: value.organization_name };
 }
 
-/** Splits the public ID list; record validation separately requires digits, order, and uniqueness. */
-function numericIds(value: string): string[] {
-  return value.split(",").map((item) => item.trim()).filter(Boolean);
-}
-
 /** Treats configured links and identity values as literal text in record patterns. */
 function escapeRegex(value: string) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -303,35 +275,8 @@ function parseIndividualRecord(text: string, agreement: string, version: string,
   return { login: match[1], id: match[2], date: match[6] };
 }
 
-/** Returns covered IDs from a complete corporate snapshot, or null for invalid content. */
-function parseCorporateRecord(text: string, agreement: string, version: string, expectedSlug: string, expectedLink: string) {
-  if (!text.startsWith(agreement)) return null;
-  const rest = text.slice(agreement.length);
-  const pattern = new RegExp(
-    String.raw`^\s*---\s*## Corporate Authorization\s+` +
-    String.raw`I,\s+@([^\s]+)\s+\(GitHub account ID:\s+(\d+)\),\s+confirm that I am authorized\s+` +
-    String.raw`to accept the \[Conveyal Contributor License Agreement, version ${escapeRegex(version.replace(/^v/, ""))}\]\(${escapeRegex(expectedLink)}\)\s+` +
-    String.raw`on behalf of the organization \`([^\`]+)\` for the authorized GitHub\s+accounts listed below, for open-source projects in the Conveyal GitHub organization\.\s+` +
-    String.raw`- Organization:\s+([^\s]+)\s+` +
-    String.raw`- Representative GitHub login:\s+([^\s]+)\s+` +
-    String.raw`- Representative GitHub account ID:\s+(\d+)\s+` +
-    String.raw`- Authorized GitHub account IDs:\s+([0-9, ]+)\s+` +
-    String.raw`- CLA version:\s+(${escapeRegex(version)})\s+` +
-    String.raw`- Signature type:\s+corporate\s+` +
-    String.raw`- Date:\s+(\d{4}-\d{2}-\d{2})\s*$`,
-  );
-  const match = pattern.exec(rest);
-  if (!match || match[3] !== match[4] || match[3] !== expectedSlug
-    || match[5] !== match[1] || match[6] !== match[2] || !validDate(match[9])) return null;
-  const ids = numericIds(match[7]);
-  if (ids.length === 0 || ids.some((id) => !/^\d+$/.test(id))
-    || ids.join(", ") !== [...new Set(ids)].sort((a, b) => BigInt(a) < BigInt(b) ? -1 : BigInt(a) > BigInt(b) ? 1 : 0).join(", ")
-    || !ids.includes(match[2])) return null;
-  return { login: match[1], representativeId: match[2], ids, date: match[9] };
-}
-
 /**
- * Collects coverage from individual records and each organization's latest snapshot for one version.
+ * Collects coverage from individual records for one version.
  * The caller supplies a trusted checkout. Older versions remain stored but provide no coverage for this version.
  * Invalid records provide no coverage; filesystem errors propagate so the caller fails closed.
  */
@@ -351,22 +296,6 @@ function records(root: string, version: string): Set<string> {
       if (parseIndividualRecord(text, agreement, version, id, expectedLink)) {
         covered.add(id);
       }
-    }
-  }
-  const corporateRoot = path.join(root, "signatures", version, "corporate");
-  if (fs.existsSync(corporateRoot)) {
-    for (const entry of fs.readdirSync(corporateRoot, { withFileTypes: true })) {
-      if (!entry.isDirectory() || !/^[a-z0-9][a-z0-9._-]*$/.test(entry.name)) continue;
-      const organizationSlug = entry.name;
-      const directory = path.join(corporateRoot, organizationSlug);
-      // Never fall back to an older snapshot if the latest one is malformed.
-      const latest = corporateSnapshots(directory).at(-1);
-      if (!latest) continue;
-      const file = path.join(directory, latest);
-      if (!fs.lstatSync(file).isFile()) throw new Error(`Record must be a regular file: ${file}`);
-      const text = fs.readFileSync(file, "utf8");
-      const parsed = parseCorporateRecord(text, agreement, version, organizationSlug, expectedLink);
-      if (parsed) for (const id of parsed.ids) covered.add(id);
     }
   }
   return covered;
@@ -395,16 +324,13 @@ export {
   assertPullRequestTarget,
   completePullRequestList,
   assertPullRequestUnchanged,
-  nextCorporateSnapshot,
   claRoot,
   validDate,
   currentVersion,
   canonical,
   loadConfig,
   records,
-  numericIds,
   recordLink,
   parseIndividualRecord,
-  parseCorporateRecord,
   updateComment,
 };
