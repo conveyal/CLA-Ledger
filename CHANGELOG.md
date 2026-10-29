@@ -13,6 +13,9 @@
 - Defined covered projects as public repositories in the Conveyal GitHub
   organization, replacing "open-source repository", and updated the signature
   record wording to match.
+- Restored the Apache-style patent termination: licenses terminate only for an
+  entity that sues over the Contribution or project. EBP may sublicense the
+  patent license to recipients of the covered project.
 - Removed corporate authorization records. Every contributor signs an individual
   record; `sign.ts` no longer accepts `--individual`, `--corporate`,
   `--organization`, or `--authorized-id`, and validation rejects corporate paths.

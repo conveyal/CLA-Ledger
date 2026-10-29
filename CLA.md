@@ -32,12 +32,16 @@ Contribution elsewhere.
 ## 3. Patent license
 
 You grant EBP a perpetual, worldwide, non-exclusive, no-charge,
-royalty-free, irrevocable patent license to make, have made, use, offer to
-sell, sell, import, and otherwise transfer the covered project, but only for
-patent claims licensable by You that are necessarily infringed by Your
-Contribution alone or in combination with the project. This patent license
-terminates for an entity that institutes patent litigation alleging that the
-Contribution or project infringes a patent.
+royalty-free, irrevocable (except as stated in this section) patent license,
+which EBP may sublicense to recipients of the covered project, to make, have
+made, use, offer to sell, sell, import, and otherwise transfer the covered
+project, but only for patent claims licensable by You that are necessarily
+infringed by Your Contribution alone or in combination with the project. If
+any entity institutes patent litigation against You or any other entity
+(including a cross-claim or counterclaim) alleging that Your Contribution or
+the covered project infringes a patent, any patent licenses granted to that
+entity under this Agreement for that Contribution or project terminate as of
+the date the litigation is filed.
 
 ## 4. Representations
 
