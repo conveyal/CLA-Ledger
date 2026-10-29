@@ -262,7 +262,7 @@ function parseIndividualRecord(text: string, agreement: string, version: string,
     String.raw`^\s*---\s*## Signature\s+` +
     String.raw`I,\s+@([^\s]+)\s+\(GitHub account ID:\s+(\d+)\),\s+agree to and sign the\s+` +
     String.raw`\[Conveyal Contributor License Agreement, version ${escapeRegex(version.replace(/^v/, ""))}\]\(${escapeRegex(expectedLink)}\)\s+` +
-    String.raw`— reproduced in full above — for open-source projects in the Conveyal GitHub organization\.\s+` +
+    String.raw`— reproduced in full above — for public repositories in the Conveyal GitHub organization\.\s+` +
     String.raw`- GitHub login:\s+([^\s]+)\s+` +
     String.raw`- GitHub account ID:\s+(\d+)\s+` +
     String.raw`- CLA version:\s+(${escapeRegex(version)})\s+` +

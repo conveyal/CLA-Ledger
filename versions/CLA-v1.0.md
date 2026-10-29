@@ -6,7 +6,7 @@ Security Alliance CLA-Ledger and is not legal advice.
 
 ## 1. Definitions
 
-"Covered project" means any open-source repository in the Conveyal GitHub
+"Covered project" means any public repository in the github.com Conveyal
 organization (`conveyal`), including future additions.
 
 "You" means the individual natural person who submits a Contribution and
