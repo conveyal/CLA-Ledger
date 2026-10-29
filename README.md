@@ -40,13 +40,9 @@ pull requests and pushes to `main`. It sets up pnpm and Node.js from
   external database is required.
 - A signature is a versioned file committed through a pull request. Maintainer
   merge is acceptance.
-- Individual records are keyed by immutable GitHub numeric account ID.
-- Corporate records name an organization, its representative account, and the
-  authorized account IDs. They do not publish legal names, emails, or addresses.
-- Records are append-only under `signatures/<version>/`. Individual signatures
-  use `individual/<account-id>.md`; corporate authorizations use numbered
-  snapshots under `corporate/<organization>/`. The newest accepted snapshot
-  supplies corporate coverage for that version.
+- Records are keyed by immutable GitHub numeric account ID. They do not
+  publish legal names, emails, or addresses.
+- Records are append-only under `signatures/<version>/individual/<account-id>.md`.
 - The contribution check reads only records already present on the trusted base
   branch and exempts GitHub accounts whose API type is `Bot`.
 - CLA v1.0 is complete. A material revision gets a new

@@ -10,8 +10,7 @@ Security Alliance CLA-Ledger and is not legal advice.
 organization (`conveyal`), including future additions.
 
 "You" means the individual natural person who submits a Contribution and
-enters this Agreement, or an authorized representative signing a corporate
-authorization on behalf of an organization. "Contribution" means any original
+enters this Agreement. "Contribution" means any original
 work of authorship, including modifications or additions, intentionally
 submitted for inclusion in a covered Conveyal project. This includes source
 code, documentation, data, schemas, tests, and configuration.
@@ -65,18 +64,12 @@ on behalf of EBP by merging the record.
 The GitHub numeric account ID is the identity of record; the signature and
 grant survive account renaming, transfer, or deletion.
 
-Corporate authorization records additionally identify the organization,
-authorized representative account, and covered contributor account IDs. A
-corporate record is effective when authorized Conveyal maintainers merge it
-on behalf of EBP.
-
 ## 7. Scope and versions
 
 This Agreement covers present and future Contributions to all covered projects.
 One accepted signature per Agreement version covers all covered projects;
-no separate repository signatures are required. Corporate coverage is limited
-to authorized contributor accounts. Workflow and refresh enrollment do not limit
-coverage.
+no separate repository signatures are required. Workflow and refresh
+enrollment do not limit coverage.
 
 This Agreement does not cover unrelated EBP projects outside that organization.
 It is forward-looking and does not re-bind historical contributions.

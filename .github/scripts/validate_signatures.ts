@@ -7,11 +7,9 @@
  */
 
 import * as fs from "node:fs";
-import * as path from "node:path";
 import {
   api, pages, claRoot, canonical, currentVersion, loadConfig, validDate,
   pullRequest, assertPullRequestTarget, completePullRequestList, assertPullRequestUnchanged,
-  nextCorporateSnapshot,
   isObject, errorMessage, type FileChange,
 } from "./cla.ts";
 
@@ -119,50 +117,9 @@ function individualError(text: string, agreement: string, version: string, autho
   return validDate(match[1]) ? null : "signing date is invalid or in the future";
 }
 
-/**
- * Return null for a corporate block matching the PR author, organization path, and canonical text, or an error message.
- * Authorized IDs must be unique, numerically sorted, and include the representative.
- * Production callers supply expectedLink; an omitted value permits any single URL.
- */
-function corporateError(text: string, agreement: string, version: string, author: string, authorId: string, expectedOrganization: string, expectedLink = "") {
-  if (!text.startsWith(agreement)) return "record must begin with the complete canonical CLA text";
-  const rest = text.slice(agreement.length);
-  const pattern = new RegExp(
-    String.raw`^\s*---\s*## Corporate Authorization\s+` +
-    String.raw`I,\s+@${escapeRegex(author)}\s+\(GitHub account ID:\s+${escapeRegex(authorId)}\),\s+confirm that I am authorized\s+` +
-    String.raw`to accept the \[Conveyal Contributor License Agreement, version ${escapeRegex(version.replace(/^v/, ""))}\]\(${expectedLink ? escapeRegex(expectedLink) : "[^\\s)]+"}\)\s+` +
-    "on behalf of the organization `([^`]+)` for the authorized GitHub\\s+accounts listed below, for open-source projects in the Conveyal GitHub organization\\.\\s+" +
-    String.raw`- Organization:\s+([^\s]+)\s+` +
-    String.raw`- Representative GitHub login:\s+${escapeRegex(author)}\s+` +
-    String.raw`- Representative GitHub account ID:\s+${escapeRegex(authorId)}\s+` +
-    String.raw`- Authorized GitHub account IDs:\s+([0-9, ]+)\s+` +
-    String.raw`- CLA version:\s+${escapeRegex(version)}\s+` +
-    String.raw`- Signature type:\s+corporate\s+` +
-    String.raw`- Date:\s+(\d{4}-\d{2}-\d{2})\s*$`,
-  );
-  const match = pattern.exec(rest);
-  if (!match || match[1] !== match[2] || match[1] !== expectedOrganization) {
-    return "corporate authorization block does not exactly match the template";
-  }
-  const ids = match[3].split(",").map((item) => item.trim());
-  const sorted = [...new Set(ids)].sort(compareNumeric);
-  if (ids.some((id) => !/^\d+$/.test(id)) || ids.length === 0
-    || ids.join(", ") !== sorted.join(", ") || !ids.includes(authorId)) {
-    return "corporate authorized IDs must be unique, numeric, sorted, and include the representative";
-  }
-  return validDate(match[4]) ? null : "signing date is invalid or in the future";
-}
-
 /** Treat identities, repository paths, and agreement links as literal text in template patterns. */
 function escapeRegex(value: string) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-/** Compare decimal ID strings without losing precision through JavaScript number conversion. */
-function compareNumeric(left: string, right: string) {
-  const a = BigInt(left);
-  const b = BigInt(right);
-  return a < b ? -1 : a > b ? 1 : 0;
 }
 
 /**
@@ -195,7 +152,7 @@ async function main() {
   }
   const errors = changed
     .filter((file) => !touchesSignature(file))
-    .map((file) => `${file.filename}: signature pull requests may change only signature or authorization records`);
+    .map((file) => `${file.filename}: signature pull requests may change only signature records`);
   const current = currentVersion(root);
   const settings = loadConfig(root);
   // Fetch the tree only when a record needs content validation, then reuse the same pinned tree.
@@ -208,23 +165,16 @@ async function main() {
       continue;
     }
     const individual = file.match(new RegExp(`^${escapeRegex(repoPrefix)}signatures/(v\\d+\\.\\d+)/individual/(\\d+)\\.md$`));
-    const corporate = file.match(new RegExp(`^${escapeRegex(repoPrefix)}signatures/(v\\d+\\.\\d+)/corporate/([a-z0-9][a-z0-9._-]*)/(\\d{4,})\\.md$`));
-    if (!individual && !corporate) {
+    if (!individual) {
       errors.push(`${file}: invalid signature path`);
       continue;
     }
-    const pathVersion = individual?.[1] || corporate?.[1];
-    if (pathVersion !== current) {
+    if (individual[1] !== current) {
       errors.push(`${file}: path must name the current CLA version ${current}`);
       continue;
     }
-    if (individual && individual[2] !== authorId) {
+    if (individual[2] !== authorId) {
       errors.push(`${file}: filename must be the authenticated account ID`);
-      continue;
-    }
-    // Derive the next snapshot from the base, preventing PR content from choosing its own sequence.
-    if (corporate && path.basename(file) !== nextCorporateSnapshot(path.dirname(file))) {
-      errors.push(`${file}: corporate authorization must add the next numbered snapshot`);
       continue;
     }
     tree ||= await headTree(headRepository, headSha);
@@ -236,11 +186,7 @@ async function main() {
     }
     const agreement = canonical(root, version);
     const expectedLink = `${settings.ledger_blob}/${repoPrefix}versions/CLA-${version}.md`;
-    const error = individual
-      ? individualError(text, agreement, version, author, authorId, expectedLink)
-      : corporate
-        ? corporateError(text, agreement, version, author, authorId, corporate[2], expectedLink)
-        : "invalid signature path";
+    const error = individualError(text, agreement, version, author, authorId, expectedLink);
     if (error) errors.push(`${file}: ${error}`);
   }
   if (errors.length > 0) {
@@ -264,4 +210,4 @@ if (import.meta.main) {
   });
 }
 
-export { main, versionFromText, individualError, corporateError, validDate };
+export { main, versionFromText, individualError, validDate };
