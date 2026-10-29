@@ -10,6 +10,9 @@
 - Clarified that one accepted signature per CLA version covers all current and
   future Conveyal open-source repositories, independently of workflow or refresh
   enrollment. Made the general setup guide repository-neutral.
+- Defined covered projects as public repositories in the Conveyal GitHub
+  organization, replacing "open-source repository", and updated the signature
+  record wording to match.
 - Removed corporate authorization records. Every contributor signs an individual
   record; `sign.ts` no longer accepts `--individual`, `--corporate`,
   `--organization`, or `--authorized-id`, and validation rejects corporate paths.

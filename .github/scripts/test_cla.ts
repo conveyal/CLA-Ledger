@@ -184,15 +184,15 @@ test("the agreement names EBP as the legal party while retaining Conveyal projec
   const settings = helpers.parseConfig(JSON.parse(fs.readFileSync(path.join(repositoryRoot, "cla/config.json"), "utf8")), "cla/config.json");
   assert.equal(settings.organization_name, "EBP US Inc.");
   assert.match(agreement, /rights you grant to EBP US Inc\.\s+\("EBP"\)/);
-  assert.match(agreement, /Conveyal GitHub\s+organization\s+\(`conveyal`\)/);
+  assert.match(agreement, /github\.com Conveyal\s+organization\s+\(`conveyal`\)/);
   assert.match(agreement, /authorized Conveyal maintainers accept the offer\s+on behalf of EBP/);
   assert.match(agreement, /does not cover unrelated EBP\s+projects outside that organization/);
   assert.doesNotMatch(agreement, /Conveyal LLC|You grant Conveyal/);
 });
 
-test("the agreement explicitly covers all current and future open-source repositories with one signature", () => {
+test("the agreement explicitly covers all current and future public repositories with one signature", () => {
   const agreement = helpers.canonical(repositoryRoot, helpers.currentVersion(repositoryRoot));
-  assert.match(agreement, /"Covered project" means any open-source repository in the Conveyal GitHub\s+organization \(`conveyal`\)/);
+  assert.match(agreement, /"Covered project" means any public repository in the github\.com Conveyal\s+organization \(`conveyal`\)/);
   assert.match(agreement, /including future additions/);
   assert.match(agreement, /One accepted signature per Agreement version covers all covered projects/);
   assert.match(agreement, /no separate repository signatures are required/);
@@ -208,7 +208,7 @@ test("validators reject signature scope outside the Conveyal organization", () =
   const validateRecord = (value: string) => validate.individualError(value, agreement, fixtureVersion, "octocat", "1");
   assert.equal(validateRecord(text), null);
   for (const scope of ["EBP's organization-wide open-source projects", "Conveyal's organization-wide open-source projects"]) {
-    const altered = text.replace("for open-source projects in the Conveyal GitHub organization.", `for ${scope}.`);
+    const altered = text.replace("for public repositories in the Conveyal GitHub organization.", `for ${scope}.`);
     assert.notEqual(altered, text);
     assert.notEqual(validateRecord(altered), null);
     write(root, individualPath, altered);

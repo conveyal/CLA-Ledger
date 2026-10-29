@@ -105,7 +105,7 @@ function individualError(text: string, agreement: string, version: string, autho
     String.raw`^\s*---\s*## Signature\s+` +
     String.raw`I,\s+@${escapeRegex(author)}\s+\(GitHub account ID:\s+${escapeRegex(authorId)}\),\s+agree to and sign the\s+` +
     String.raw`\[Conveyal Contributor License Agreement, version ${escapeRegex(version.replace(/^v/, ""))}\]\(${expectedLink ? escapeRegex(expectedLink) : "[^\\s)]+"}\)\s+` +
-    String.raw`— reproduced in full above — for open-source projects in the Conveyal GitHub organization\.\s+` +
+    String.raw`— reproduced in full above — for public repositories in the Conveyal GitHub organization\.\s+` +
     String.raw`- GitHub login:\s+${escapeRegex(author)}\s+` +
     String.raw`- GitHub account ID:\s+${escapeRegex(authorId)}\s+` +
     String.raw`- CLA version:\s+${escapeRegex(version)}\s+` +
