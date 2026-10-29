@@ -1,9 +1,8 @@
 # Configure the Conveyal CLA check in a repository
 
-This guide connects any open-source repository in the Conveyal GitHub
-organization to the central `conveyal/CLA-Ledger`. Each repository calls a
-reusable GitHub Actions workflow that checks every human commit
-author against the current CLA version. Contributors sign in the central ledger.
+This guide connects a covered repository to the central `conveyal/CLA-Ledger`.
+Each repository calls a reusable GitHub Actions workflow that checks every human
+commit author against the current CLA version. Contributors sign in the central ledger.
 
 Each repository needs one caller workflow and a link to the signing instructions.
 Optional automatic refresh uses a GitHub App configured in the central ledger.
@@ -11,10 +10,8 @@ The reusable workflow supplies Node.js and reads the central records. The
 repository does not need an npm package, a signing helper, or a local copy of
 the signature records.
 
-One accepted signature per CLA version covers all current and future open-source
-repositories in the Conveyal organization. Adding a repository's workflow or
-refresh entry does not require contributors to sign again. These steps configure
-enforcement, not agreement scope.
+These steps configure enforcement, not agreement scope.
+[CLA section 7](CLA.md#7-scope-and-versions) defines which repositories are covered.
 
 ## 1. Prepare the central ledger
 
@@ -112,7 +109,6 @@ Add this link to the repository's README or contribution guide:
 
 ```markdown
 Before contributing, sign the [Conveyal Contributor License Agreement](https://github.com/conveyal/CLA-Ledger/blob/main/CLA.md).
-One accepted signature per CLA version covers all Conveyal open-source repositories; no separate signature is needed for this repository.
 The automated check requires current CLA coverage for every human commit author.
 ```
 
@@ -182,7 +178,7 @@ The check fails closed when it cannot establish coverage. The
 [reusable workflow](.github/workflows/check-contributors.yml) and
 [coverage script](.github/scripts/check_cla.ts) define the current behavior.
 
-For each Conveyal open-source repository, use the same caller in that repository.
+For each covered repository, use the same caller in that repository.
 Keep the central ledger and signing URL, and configure its own protected branches.
 Coverage alone needs no enrollment. Automatic refresh needs the project entry and App installation below.
 
