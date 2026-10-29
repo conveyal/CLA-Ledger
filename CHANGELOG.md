@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased
+
+- Finalized the unsigned pre-release agreement as `v1.0` and removed draft labels.
+- Updated canonical paths, signing instructions, and test fixtures for `v1.0`.
+- Named EBP US Inc. as the legal party and license recipient, with authorized
+  Conveyal maintainers accepting records on its behalf. Coverage remains limited
+  to open-source projects in the Conveyal GitHub organization.
+- Clarified that one accepted signature per CLA version covers all current and
+  future Conveyal open-source repositories, independently of workflow or refresh
+  enrollment. Made the general setup guide repository-neutral.
+- Defined covered projects as public repositories in the Conveyal GitHub
+  organization, replacing "open-source repository", and updated the signature
+  record wording to match.
+- Restored the Apache-style patent termination: licenses terminate only for an
+  entity that sues over the Contribution or project. EBP may sublicense the
+  patent license to recipients of the covered project.
+- Removed corporate authorization records. Every contributor signs an individual
+  record; `sign.ts` no longer accepts `--individual`, `--corporate`,
+  `--organization`, or `--authorized-id`, and validation rejects corporate paths.
+
 ## v0.0.1 — 2026-10-08
 
 First tooling release. Consumers must grant `checks: write` and require the
@@ -7,8 +27,6 @@ explicit `Conveyal CLA` check on the PR head. Automatic refresh additionally
 needs a `workflow_dispatch` input named `pr_number`; use the complete caller
 in [SETUP_PROJECT.md](SETUP_PROJECT.md).
 
-- Renumbered the unsigned provisional agreement to `v0.1`; legal review will
-  produce a later version without rewriting accepted records.
 - Added a shared individual-record renderer, `--editor-url`, and opt-in
   personalized signing comments. The maintainer-account browser prototype passed;
   outsider forking remains a rollout check.
@@ -19,11 +37,11 @@ in [SETUP_PROJECT.md](SETUP_PROJECT.md).
   evaluation on the unchanged contribution commit, and comment replacement
   in `conveyal/cla-test`. Testing with an account without write access remains
   required before the production onboarding pilot.
-- Selected `v0.0.1` for the first tooling release, independently of agreement `v0.1`.
+- Selected `v0.0.1` for the first tooling release, independently of agreement versions.
 
 ## Initial implementation
 
 - Adapted the Cloud Security Alliance CLA-Ledger under CC BY 4.0 for Conveyal.
-- Added a provisional organization-wide CLA and GitHub-native
+- Added an organization-wide CLA and GitHub-native
   individual/corporate record formats.
 - Added trusted-base signature validation and fail-closed contribution checks.

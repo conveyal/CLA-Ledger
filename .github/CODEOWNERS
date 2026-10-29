@@ -19,6 +19,7 @@
 
 # NOTE: signature files are contributor-submitted via pull request.
 # validate-signature.yml checks opener identity, required fields, and verbatim
-# CLA text; a Conveyal maintainer then reviews and merges the record. The
+# CLA text; an authorized Conveyal maintainer then reviews and merges the record
+# on behalf of EBP US Inc. The
 # catch-all intentionally covers signature PRs too: review and merge are the
 # acceptance step.

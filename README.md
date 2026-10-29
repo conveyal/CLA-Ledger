@@ -7,8 +7,12 @@ licensed under CC BY 4.0, and modified for Conveyal's open-source projects.
 
 This public repository is the authoritative organization-wide ledger for
 Conveyal. It contains the canonical agreement versions, public signature
-records, signing helper, validation logic, and reusable workflows used by R5
-and any other opted-in repository.
+records, signing helper, validation logic, and reusable workflows for Conveyal's
+open-source repositories.
+
+EBP US Inc. is the CLA's legal party and license recipient. The
+[agreement](CLA.md) defines which repositories it covers and how signatures are
+accepted.
 
 The helper and workflow scripts require Node.js 24.2 or newer and use only Node's
 built-in modules. No npm install or TypeScript compiler is required; run them
@@ -36,21 +40,17 @@ pull requests and pushes to `main`. It sets up pnpm and Node.js from
   external database is required.
 - A signature is a versioned file committed through a pull request. Maintainer
   merge is acceptance.
-- Individual records are keyed by immutable GitHub numeric account ID.
-- Corporate records name an organization, its representative account, and the
-  authorized account IDs. They do not publish legal names, emails, or addresses.
-- Records are append-only under `signatures/<version>/`. Individual signatures
-  use `individual/<account-id>.md`; corporate authorizations use numbered
-  snapshots under `corporate/<organization>/`. The newest accepted snapshot
-  supplies corporate coverage for that version.
+- Records are keyed by immutable GitHub numeric account ID. They do not
+  publish legal names, emails, or addresses.
+- Records are append-only under `signatures/<version>/individual/<account-id>.md`.
 - The contribution check reads only records already present on the trusted base
   branch and exempts GitHub accounts whose API type is `Bot`.
-- CLA text is provisional until legal review. A material revision gets a new
+- CLA v1.0 is complete. A material revision gets a new
   immutable version and does not rewrite historical signatures.
 
 ## Using the ledger from another repository
 
-Follow [SETUP_PROJECT.md](SETUP_PROJECT.md) for the R5 caller workflow,
+Follow [SETUP_PROJECT.md](SETUP_PROJECT.md) for the caller workflow,
 release selection, rollout checks, and branch protection setup.
 
 Consumer repositories need only a small caller workflow. It supplies the
@@ -66,16 +66,16 @@ See [RELEASING.md](RELEASING.md) to publish a tooling release. Tooling releases
 are independent of CLA agreement versions. New accepted signatures become
 available through ledger data at `main` without a tooling release.
 
-The current provisional agreement is `v0.1`; the first tooling release is
+The current agreement is `v1.0`; the first tooling release is
 planned as `v0.0.1`. These version numbers are independent. The
 [editor-link prototype](EDITOR_PROTOTYPE.md) records the successful maintainer
 browser test and the remaining outsider-fork test. Consumers can enable
 individual signing links with `personalized_signing_links: true`.
 
-To add another repository, copy the caller workflow and change only its
-repository-specific signing link if needed. Coverage checking needs no central
-enrollment. Automatic refresh additionally requires an entry in
-`cla/projects.json` and the scoped GitHub App described in [SETUP_PROJECT.md](SETUP_PROJECT.md).
+To add enforcement to another repository, copy the caller workflow, keep the
+central ledger and signing URL, and configure the required check. Coverage
+checking needs no central enrollment. Automatic refresh additionally requires an
+entry in `cla/projects.json` and the scoped GitHub App described in [SETUP_PROJECT.md](SETUP_PROJECT.md).
 
 Checks verify that GitHub returned every changed file and commit, and that the
 PR head and base stayed unchanged during validation. GitHub's PR APIs cap
@@ -89,4 +89,4 @@ Refresh dispatches resolve current revisions instead of replaying old events.
 ## Attribution
 
 Based on Cloud Security Alliance's CLA-Ledger, licensed under CC BY 4.0.
-Modified by Conveyal for GitHub-native use in R5 and other Conveyal projects.
+Modified by Conveyal for GitHub-native use in its open-source projects, for example, R5.
