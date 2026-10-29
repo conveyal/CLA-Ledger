@@ -3,17 +3,16 @@
 ### Why is a CLA required?
 
 It gives EBP US Inc. permission to use, modify, distribute, and sublicense
-contributions to covered open-source projects in the Conveyal GitHub organization
-(`conveyal`). Contributors retain ownership and may reuse their work. The CLA
-does not cover unrelated EBP projects outside that organization.
+contributions to covered projects. Contributors retain ownership and may reuse
+their work. See [CLA section 7](CLA.md#7-scope-and-versions) for which
+projects are covered.
 
 ### Who signs?
 
-Every human author of a new pull request must be covered. Individuals sign once
-per CLA version for all open-source repositories in the Conveyal GitHub organization,
-including future repositories. Separate signatures for each repository are not
-required. A corporate representative may authorize a
-set of GitHub account IDs through a corporate record.
+Every human author of a new pull request must be covered. One signature per CLA
+version covers every covered project; see [CLA section 7](CLA.md#7-scope-and-versions).
+A corporate representative may authorize a set of GitHub account IDs through a
+corporate record.
 
 ### How do I sign?
 
@@ -49,9 +48,8 @@ legal signature. Human authors remain responsible for their work.
 
 ### What if the CLA changes?
 
-The current version is shown in `versions/CURRENT`. A material revision is
-published as a new immutable version and requires re-signing for future work;
-past contributions remain under the version accepted at the time.
+The current version is shown in `versions/CURRENT`. See
+[CLA section 7](CLA.md#7-scope-and-versions) for how a new version affects past and future contributions.
 
 ### Is this final legal text?
 

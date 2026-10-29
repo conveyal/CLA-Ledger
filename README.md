@@ -10,15 +10,9 @@ Conveyal. It contains the canonical agreement versions, public signature
 records, signing helper, validation logic, and reusable workflows for Conveyal's
 open-source repositories.
 
-EBP US Inc. is the CLA's legal party and license recipient. The agreement covers
-open-source projects in the Conveyal GitHub organization (`conveyal`), not
-unrelated EBP projects outside that organization. Authorized Conveyal maintainers
-accept signature records on EBP's behalf.
-
-One accepted signature per CLA version covers all open-source repositories in
-the organization, including future additions. Contributors do not sign again
-for each repository. Workflow installation and automatic refresh enrollment
-affect enforcement, not agreement scope.
+EBP US Inc. is the CLA's legal party and license recipient. The
+[agreement](CLA.md) defines which repositories it covers and how signatures are
+accepted.
 
 The helper and workflow scripts require Node.js 24.2 or newer and use only Node's
 built-in modules. No npm install or TypeScript compiler is required; run them
@@ -83,10 +77,9 @@ browser test and the remaining outsider-fork test. Consumers can enable
 individual signing links with `personalized_signing_links: true`.
 
 To add enforcement to another repository, copy the caller workflow, keep the
-central ledger and signing URL, and configure the required check. Existing
-current-version signatures already cover its contributors. Coverage checking
-needs no central enrollment. Automatic refresh additionally requires an entry in
-`cla/projects.json` and the scoped GitHub App described in [SETUP_PROJECT.md](SETUP_PROJECT.md).
+central ledger and signing URL, and configure the required check. Coverage
+checking needs no central enrollment. Automatic refresh additionally requires an
+entry in `cla/projects.json` and the scoped GitHub App described in [SETUP_PROJECT.md](SETUP_PROJECT.md).
 
 Checks verify that GitHub returned every changed file and commit, and that the
 PR head and base stayed unchanged during validation. GitHub's PR APIs cap
