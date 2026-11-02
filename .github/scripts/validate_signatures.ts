@@ -2,13 +2,13 @@
 /**
  * Validate new signature records against the trusted base checkout and authenticated PR author.
  * Read proposed content through GitHub's API without executing code from the PR.
- * Require canonical agreement text, current versions, matching identities, and append-only paths.
+ * Require the canonical agreement hash, current versions, matching identities, and append-only paths.
  * Check Git tree modes separately because the Contents API can follow symlinks.
  */
 
 import * as fs from "node:fs";
 import {
-  api, pages, claRoot, canonical, currentVersion, loadConfig, validDate,
+  api, pages, claRoot, canonical, agreementHash, currentVersion, loadConfig, validDate,
   pullRequest, assertPullRequestTarget, completePullRequestList, assertPullRequestUnchanged,
   isObject, errorMessage, type FileChange,
 } from "./cla.ts";
@@ -95,24 +95,23 @@ function versionFromText(text: string) {
 }
 
 /**
- * Return null for canonical text and an individual block matching the authenticated PR author, or an error message.
+ * Return null for a canonical agreement hash and an individual block matching the authenticated PR author, or an error message.
  * An omitted expectedLink permits any single URL; production validation always supplies the configured agreement link.
  */
 function individualError(text: string, agreement: string, version: string, author: string, authorId: string, expectedLink = "") {
-  if (!text.startsWith(agreement)) return "record must begin with the complete canonical CLA text";
-  const rest = text.slice(agreement.length);
   const pattern = new RegExp(
-    String.raw`^\s*---\s*## Signature\s+` +
-    String.raw`I,\s+@${escapeRegex(author)}\s+\(GitHub account ID:\s+${escapeRegex(authorId)}\),\s+agree to and sign the\s+` +
+    String.raw`^\s*## Signature\s+` +
+    String.raw`I,\s+@${escapeRegex(author)}\s+\(GitHub account ID:\s+${escapeRegex(authorId)}\),\s+have read, agree to, and sign the\s+` +
     String.raw`\[Conveyal Contributor License Agreement, version ${escapeRegex(version.replace(/^v/, ""))}\]\(${expectedLink ? escapeRegex(expectedLink) : "[^\\s)]+"}\)\s+` +
-    String.raw`— reproduced in full above — for public repositories in the Conveyal GitHub organization\.\s+` +
+    String.raw`for public repositories in the Conveyal GitHub organization\.\s+` +
     String.raw`- GitHub login:\s+${escapeRegex(author)}\s+` +
     String.raw`- GitHub account ID:\s+${escapeRegex(authorId)}\s+` +
     String.raw`- CLA version:\s+${escapeRegex(version)}\s+` +
+    String.raw`- Agreement SHA-256:\s+${agreementHash(agreement)}\s+` +
     String.raw`- Signature type:\s+individual\s+` +
     String.raw`- Date:\s+(\d{4}-\d{2}-\d{2})\s*$`,
   );
-  const match = pattern.exec(rest);
+  const match = pattern.exec(text);
   if (!match) return "individual signature block does not exactly match the template";
   return validDate(match[1]) ? null : "signing date is invalid or in the future";
 }

@@ -15,8 +15,8 @@ version covers every covered project; see [CLA section 7](CLA.md#7-scope-and-ver
 ### How do I sign?
 
 If your contribution's CLA comment has a **Sign the CLA** link beside your
-account, open it, review the complete record in GitHub's editor, commit on a
-new branch, and open the signature PR using that account. A maintainer must
+account, read the agreement, open the link, review the record in GitHub's editor,
+commit on a new branch, and open the signature PR using that account. A maintainer must
 merge it before the contribution has coverage.
 
 Clone `conveyal/CLA-Ledger` and run
