@@ -90,3 +90,4 @@ Refresh dispatches resolve current revisions instead of replaying old events.
 
 Based on Cloud Security Alliance's CLA-Ledger, licensed under CC BY 4.0.
 Modified by Conveyal for GitHub-native use in its open-source projects, for example, R5.
+This adaptation is not legal advice.
