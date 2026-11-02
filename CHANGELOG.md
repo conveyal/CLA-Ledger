@@ -19,6 +19,8 @@
 - Removed corporate authorization records. Every contributor signs an individual
   record; `sign.ts` no longer accepts `--individual`, `--corporate`,
   `--organization`, or `--authorized-id`, and validation rejects corporate paths.
+- Signature records now link to the agreement and state its SHA-256 hash instead
+  of embedding its text, which keeps signing links short at any agreement length.
 
 ## v0.0.1 — 2026-10-08
 

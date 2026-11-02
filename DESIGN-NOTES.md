@@ -29,7 +29,10 @@ They use trusted caller-base and pinned implementation checkouts. Checkout
 failures complete the prepared check as failure; per-PR concurrency cancels
 superseded evaluations.
 
-Personalized editor links reproduce the complete agreement and record template
+Records identify the agreement by link, version, and SHA-256 hash; `versions/`
+stays frozen once signed, so the hash proves which text was accepted.
+
+Personalized editor links reproduce the record template
 for each uncovered account. They do not submit a signature or establish identity.
 The PR opener still supplies authentication. A conservative URL budget and a
 comment-size budget retain manual instructions when a full link cannot fit.
