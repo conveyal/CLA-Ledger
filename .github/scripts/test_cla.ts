@@ -799,6 +799,8 @@ test("personalized comments preserve canonical records and stay within their siz
   try {
     const settings = { ...config, ledger_blob: "https://github.com/conveyal/cla-test/blob/main" };
     write(root, "cla/config.json", JSON.stringify(settings));
+    // A compact agreement keeps this budget test independent of the real agreement's length.
+    write(root, `versions/CLA-${fixtureVersion}.md`, "Compact test agreement.\n");
     const authors = Array.from({ length: 250 }, (_, i) => ({ login: `user-${i}`, id: String(i + 1) }));
     const lines = check.signingLines(root, fixtureVersion, authors, 30000);
     assert.equal(lines.length, 250);
