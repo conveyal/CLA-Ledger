@@ -175,7 +175,7 @@ test("current versions and dates are validated", () => {
 
 test("the current agreement matches the public signing document", () => {
   const version = helpers.currentVersion(repositoryRoot);
-  assert.equal(fs.readFileSync(path.join(repositoryRoot, "CLA.md"), "utf8").trimEnd(), helpers.canonical(repositoryRoot, version));
+  assert.equal(fs.readFileSync(path.join(repositoryRoot, "CLA.md"), "utf8"), helpers.canonical(repositoryRoot, version));
 });
 
 test("the agreement names EBP as the legal party while retaining Conveyal project scope", () => {
@@ -224,8 +224,8 @@ test("editor links round-trip the canonical record and pass signer validation", 
   assert.equal(url.pathname, "/conveyal/cla-test/new/main");
   assert.equal(url.searchParams.get("filename"), individualPath);
   assert.equal(url.searchParams.get("value"), prepared.text);
-  assert.equal(validate.individualError(prepared.text, agreement.trimEnd(), fixtureVersion, "octocat", "1", helpers.recordLink(settings, fixtureVersion)), null);
-  assert.notEqual(validate.individualError(prepared.text, agreement.trimEnd(), fixtureVersion, "someone-else", "2"), null);
+  assert.equal(validate.individualError(prepared.text, agreement, fixtureVersion, "octocat", "1", helpers.recordLink(settings, fixtureVersion)), null);
+  assert.notEqual(validate.individualError(prepared.text, agreement, fixtureVersion, "someone-else", "2"), null);
 });
 
 test("editor links preserve nested ledger paths and reject unsafe destinations", () => {

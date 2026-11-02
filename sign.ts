@@ -87,9 +87,9 @@ function currentVersion(config: ClaConfig, requested?: string) {
   return current;
 }
 
-/** Read published agreement text with the same trailing-whitespace normalization used by validation. */
+/** Read published agreement text unchanged, as validation does. */
 function canonical(config: ClaConfig, version: string) {
-  return fs.readFileSync(path.join(config.cla_root, "versions", `CLA-${version}.md`), "utf8").trimEnd();
+  return fs.readFileSync(path.join(config.cla_root, "versions", `CLA-${version}.md`), "utf8");
 }
 
 /** Look up a login's numeric GitHub ID; throw on lookup failure or an ID that cannot be represented exactly. */

@@ -217,14 +217,14 @@ function currentVersion(root: string): string {
   return value;
 }
 
-/** Reads agreement text without trailing whitespace for consistent signature block comparison. */
+/** Reads agreement text unchanged so its hash matches a checksum of the published file. */
 function canonical(root: string, version: string): string {
-  return fs.readFileSync(path.join(root, "versions", `CLA-${version}.md`), "utf8").trimEnd();
+  return fs.readFileSync(path.join(root, "versions", `CLA-${version}.md`), "utf8");
 }
 
-/** Hashes agreement text without trailing whitespace, so a record identifies the exact text signed. */
+/** Hashes the exact agreement text, so `shasum -a 256` on the published file gives the same value. */
 function agreementHash(agreement: string): string {
-  return createHash("sha256").update(agreement.trimEnd(), "utf8").digest("hex");
+  return createHash("sha256").update(agreement, "utf8").digest("hex");
 }
 
 /** Reads configuration from the ledger root or its cla/ subdirectory. */
