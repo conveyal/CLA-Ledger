@@ -14,11 +14,12 @@ Run `node sign.ts` without arguments to answer the same questions interactively.
 
 The current agreement is `v1.0`. The `--editor-url` option prepares
 a signing link without writing a file. Opted-in contribution
-workflows also include these links beside uncovered authors. Review the full
-record in the GitHub editor, commit on a new branch, and open the signature PR
-using the named account. See the [browser evidence](../EDITOR_PROTOTYPE.md).
+workflows also include these links beside uncovered authors. Read the agreement,
+review the record in the GitHub editor, commit on a new branch, and open the
+signature PR using the named account. See the [browser evidence](../EDITOR_PROTOTYPE.md).
 
-Records use `signatures/<version>/individual/<id>.md`. Signing a new CLA
+Records use `signatures/<version>/individual/<id>.md`. Each links to the agreement
+and states its SHA-256 hash; the validator rejects any other hash. Signing a new CLA
 version creates a new file and preserves the previous record. The helper
 refuses to replace an existing record. A maintainer merge is acceptance.
 

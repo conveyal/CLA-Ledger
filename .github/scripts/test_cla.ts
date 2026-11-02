@@ -59,8 +59,7 @@ function fixture() {
 
 /** Build a valid synthetic record so each test can alter one identity, template, or coverage constraint. */
 function record(root: string, version = fixtureVersion) {
-  const agreement = helpers.canonical(root, version);
-  return `${agreement}\n\n${sign.buildIndividual(config, "octocat", "1", version, "2020-01-01")}`;
+  return individualRecord(config, helpers.canonical(root, version), "octocat", "1", version, "2020-01-01").text;
 }
 
 /**
@@ -216,9 +215,9 @@ test("validators reject signature scope outside the Conveyal organization", () =
   }
 });
 
-test("editor links round-trip the complete canonical record and pass signer validation", () => {
+test("editor links round-trip the canonical record and pass signer validation", () => {
   const settings = { ...config, ledger_blob: "https://github.com/conveyal/cla-test/blob/main" };
-  const agreement = `${helpers.canonical(fixture(), fixtureVersion)}\n\nFormatting: ✓ + & # %\n\n`;
+  const agreement = `${helpers.canonical(fixture(), fixtureVersion)}\n\n`;
   const prepared = individualRecord(settings, agreement, "octocat", "1", fixtureVersion, "2020-01-01");
   const url = new URL(individualEditorUrl(settings, prepared));
   assert.equal(url.origin, "https://github.com");
@@ -253,7 +252,7 @@ test("generated individual records reject invalid identities, versions, dates, a
   assert.throws(() => individualRecord(config, " ", "octocat", "1", fixtureVersion, "2020-01-01"), /empty/);
 });
 
-test("individual coverage requires canonical text, matching identity, link, version, and date", () => {
+test("individual coverage requires the canonical hash, matching identity, link, version, and date", () => {
   const root = fixture();
   const text = record(root);
   const agreement = helpers.canonical(root, fixtureVersion);
@@ -266,7 +265,8 @@ test("individual coverage requires canonical text, matching identity, link, vers
     text.replace("https://example.test/blob", "https://invalid.test/blob"),
     text.replace(`CLA version: ${fixtureVersion}`, "CLA version: v0.0"),
     text.replace("2020-01-01", "2999-01-01"),
-    text.replace(agreement, "tampered agreement"),
+    text.replace(helpers.agreementHash(agreement), helpers.agreementHash("tampered agreement")),
+    `${agreement}\n\n${text}`,
     text + "tampered",
   ]) {
     write(root, individualPath, invalid);
@@ -808,7 +808,7 @@ test("personalized comments preserve canonical records and stay within their siz
     const url = new URL(lines[0].match(/\[Sign the CLA\]\(([^)]+)\)/)?.[1] || "");
     assert.equal(url.searchParams.get("filename"), individualPath);
     assert.equal(validate.individualError(url.searchParams.get("value") || "", helpers.canonical(root, fixtureVersion), fixtureVersion, "user-0", "1", helpers.recordLink(settings, fixtureVersion)), null);
-    write(root, `versions/CLA-${fixtureVersion}.md`, "x".repeat(6000));
+    write(root, "cla/config.json", JSON.stringify({ ...settings, ledger_blob: `https://github.com/conveyal/${"x".repeat(6000)}/blob/main` }));
     assert.doesNotMatch(check.signingLines(root, fixtureVersion, [authors[0]], 60000)[0], /\[Sign the CLA\]/);
   } finally { if (old === undefined) delete process.env.EDITOR_LINKS; else process.env.EDITOR_LINKS = old; }
 });

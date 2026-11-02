@@ -42,6 +42,10 @@ entire agreement; shortening only the test notice fixed that observed failure.
 This is evidence of a URL-size constraint in this flow, not a documented
 universal limit. Future agreement changes must repeat the browser test.
 
+Records now identify the agreement by link and SHA-256 hash instead of embedding
+its text, so link size no longer depends on agreement length. The evidence above
+predates this format; repeat the browser test before rollout.
+
 GitHub documents its automatic fork-and-propose workflow in
 [Creating new files](https://docs.github.com/en/repositories/working-with-files/managing-files/creating-new-files).
 The `filename` and `value` URL parameters are experimental here; passing the
@@ -68,9 +72,8 @@ performs those actions.
 1. Sign in as the account named in the test repository's link.
 2. Open its **Open the prefilled test file** link.
 3. Verify the filename is `signatures/<fixture-version>/individual/<account-id>.md`, using the test repository's `versions/CURRENT` value.
-4. Verify the editor includes the test-only notice, the entire agreement, and
-   the signature block. The test fixture also contains Unicode and literal
-   `+`, `&`, `#`, and `%` characters to detect encoding problems.
+4. Verify the editor includes the signature block, the agreement link, and the
+   agreement's SHA-256 hash.
 5. Select **Commit changes**, choose a new branch, and open a pull request.
    Accounts with write access must choose a new branch instead of committing
    directly to `main`.

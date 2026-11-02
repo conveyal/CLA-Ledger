@@ -38,8 +38,8 @@ pull requests and pushes to `main`. It sets up pnpm and Node.js from
 
 - GitHub is the identity and acceptance system; no hosted CLA service or
   external database is required.
-- A signature is a versioned file committed through a pull request. Maintainer
-  merge is acceptance.
+- A signature is a versioned file committed through a pull request. It links to
+  the agreement and records its SHA-256 hash. Maintainer merge is acceptance.
 - Records are keyed by immutable GitHub numeric account ID. They do not
   publish legal names, emails, or addresses.
 - Records are append-only under `signatures/<version>/individual/<account-id>.md`.

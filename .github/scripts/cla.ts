@@ -6,6 +6,7 @@
  * Node executes this module directly with built-in TypeScript type stripping.
  */
 
+import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
@@ -221,6 +222,11 @@ function canonical(root: string, version: string): string {
   return fs.readFileSync(path.join(root, "versions", `CLA-${version}.md`), "utf8").trimEnd();
 }
 
+/** Hashes agreement text without trailing whitespace, so a record identifies the exact text signed. */
+function agreementHash(agreement: string): string {
+  return createHash("sha256").update(agreement.trimEnd(), "utf8").digest("hex");
+}
+
 /** Reads configuration from the ledger root or its cla/ subdirectory. */
 function loadConfig(root: string): ClaConfig {
   const direct = path.join(root, "config.json");
@@ -256,20 +262,19 @@ function recordLink(settings: ClaConfig, version: string) {
  * The trusted checkout supplies acceptance evidence; this parser does not authenticate the account.
  */
 function parseIndividualRecord(text: string, agreement: string, version: string, expectedId: string, expectedLink: string) {
-  if (!text.startsWith(agreement)) return null;
-  const rest = text.slice(agreement.length);
   const pattern = new RegExp(
-    String.raw`^\s*---\s*## Signature\s+` +
-    String.raw`I,\s+@([^\s]+)\s+\(GitHub account ID:\s+(\d+)\),\s+agree to and sign the\s+` +
+    String.raw`^\s*## Signature\s+` +
+    String.raw`I,\s+@([^\s]+)\s+\(GitHub account ID:\s+(\d+)\),\s+have read, agree to, and sign the\s+` +
     String.raw`\[Conveyal Contributor License Agreement, version ${escapeRegex(version.replace(/^v/, ""))}\]\(${escapeRegex(expectedLink)}\)\s+` +
-    String.raw`— reproduced in full above — for public repositories in the Conveyal GitHub organization\.\s+` +
+    String.raw`for public repositories in the Conveyal GitHub organization\.\s+` +
     String.raw`- GitHub login:\s+([^\s]+)\s+` +
     String.raw`- GitHub account ID:\s+(\d+)\s+` +
     String.raw`- CLA version:\s+(${escapeRegex(version)})\s+` +
+    String.raw`- Agreement SHA-256:\s+${agreementHash(agreement)}\s+` +
     String.raw`- Signature type:\s+individual\s+` +
     String.raw`- Date:\s+(\d{4}-\d{2}-\d{2})\s*$`,
   );
-  const match = pattern.exec(rest);
+  const match = pattern.exec(text);
   if (!match || match[2] !== expectedId || match[3] !== match[1] || match[4] !== expectedId) return null;
   if (!validDate(match[6])) return null;
   return { login: match[1], id: match[2], date: match[6] };
@@ -328,6 +333,7 @@ export {
   validDate,
   currentVersion,
   canonical,
+  agreementHash,
   loadConfig,
   records,
   recordLink,

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Prepare an individual signature with Node 24.2+ built-ins.
- * Prepend the locally published agreement and create a new record without replacing existing history.
+ * Identify the locally published agreement by hash and create a new record without replacing existing history.
  * Account lookup and offline IDs prepare record text; the authenticated PR establishes the submitter's identity.
  * The workflow validator and maintainer review determine whether a proposed record enters the ledger.
  */
@@ -11,7 +11,7 @@ import * as path from "node:path";
 import * as readline from "node:readline/promises";
 import { parseArgs as parseNodeArgs } from "node:util";
 import { errorMessage, isObject, parseConfig, type ClaConfig } from "./.github/scripts/cla.ts";
-import { buildIndividual, individualRecord, individualEditorUrl } from "./.github/scripts/signature_record.ts";
+import { individualRecord, individualEditorUrl } from "./.github/scripts/signature_record.ts";
 
 /** Parsed signing choices; prompts fill missing values before record generation. */
 interface SignArgs {
@@ -202,4 +202,4 @@ if (import.meta.main) {
   });
 }
 
-export { parseArgs, currentVersion, buildIndividual };
+export { parseArgs, currentVersion };
