@@ -108,11 +108,16 @@ Material changes receive a new version and require a new record for future
 Contributions; prior records and grants remain effective under their signed
 version.
 
-No governing-law or venue clause is included in this version. Any
-such clause will be introduced only through a counsel-reviewed material
-version.
+## 8. Governing law
 
-## 8. Entire agreement; no limitation of existing rights
+This Agreement is governed by and construed in accordance with the laws of the
+Commonwealth of Massachusetts, USA, excluding its conflict-of-law provisions.
+The parties consent to the exclusive jurisdiction and venue of the state courts
+of the Commonwealth of Massachusetts and the United States District Court for
+the District of Massachusetts for any dispute arising out of or relating to this
+Agreement.
+
+## 9. Entire agreement; no limitation of existing rights
 
 This Agreement constitutes the entire agreement between the parties concerning
 the subject matter hereof. Nothing in this Agreement supersedes, limits, or
