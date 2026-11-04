@@ -1,73 +1,120 @@
-# Conveyal Contributor License Agreement (v1.0)
+# Cloud Security Alliance — Contributor License Agreement (v1.0)
 
-This Contributor License Agreement ("Agreement") records the rights you grant to EBP US Inc.
-("EBP") for Contributions to covered projects. It is adapted from the Cloud
-Security Alliance CLA-Ledger.
+Thank you for your interest in the Cloud Security Alliance ("CSA"). In order
+to clarify the intellectual property license granted with Contributions from
+any person or entity, CSA must have on file a signed Contributor License
+Agreement ("Agreement") from each Contributor, indicating agreement to the
+license terms below. This Agreement is for your protection as a Contributor
+as well as the protection of CSA and the users of materials CSA distributes;
+it does not change your rights to use your own Contributions for any other
+purpose.
+
+This Agreement applies to Contributions You submit to the **CSA Security
+Controls Catalog** — the project maintained at
+`CloudSecurityAlliance/SecurityControlsCatalog` — and to the works CSA
+distributes from it. Those works are published under the license in that
+repository's `LICENSE.txt`, which is an instance of CSA's standard publication
+license (the text of which is published in this repository at
+[`STANDARD-LICENSE.md`](https://github.com/CloudSecurityAlliance/CLA-Ledger/blob/main/STANDARD-LICENSE.md)), as that license may be updated
+from time to time. A separate signature under this Agreement is made for each
+CSA project; signing here covers Your Contributions to the Security Controls
+Catalog.
+
+You accept and agree to the following terms and conditions for Your present
+and future Contributions submitted to the Security Controls Catalog. This
+Agreement is forward-looking and project-specific: it governs the Contributions
+You make to this project and grants CSA no rights in any other work of Yours,
+including pre-existing works that You do not submit as Contributions to the
+Security Controls Catalog. Except for the license granted herein to CSA, You
+reserve all right, title, and interest in and to Your Contributions.
 
 ## 1. Definitions
 
-"Covered project" means any public repository in the github.com Conveyal
-organization (`conveyal`), including future additions.
+"You" (or "Your") shall mean the individual natural person who submits a
+Contribution and enters into this Agreement with CSA, and who either owns the
+rights in that Contribution or is authorized to grant the licenses in this
+Agreement. If Your Contribution is owned by an employer or other entity, You
+must have that party's authorization to grant these licenses (see section 4).
 
-"You" means the individual natural person who submits a Contribution and
-enters this Agreement. "Contribution" means any original
-work of authorship, including modifications or additions, intentionally
-submitted for inclusion in a covered Conveyal project. This includes source
-code, documentation, data, schemas, tests, and configuration. "Submitted" means
-any form of electronic, verbal, or written communication sent to EBP or its
-representatives, including communication on mailing lists, source control
-systems, and issue tracking systems of covered projects, but excluding
-communication conspicuously marked or otherwise designated in writing by You as
-"Not a Contribution."
+"Contribution" shall mean any original work of authorship, including any
+modifications or additions to an existing work, that is intentionally
+submitted by You to CSA for inclusion in, or documentation of, the CSA Security
+Controls Catalog and the works CSA distributes from it (the "Work"). For the
+purposes of this definition, "Contribution" includes, without limitation,
+security control definitions, control mappings and mapping rationale,
+assessment content, structured data, schemas, documentation, and software.
+"Submitted" means any form of electronic, verbal, or written communication
+sent to CSA or its representatives, including but not limited to communication
+on electronic mailing lists, source code control systems, and issue tracking
+systems that are managed by, or on behalf of, CSA for the purpose of
+discussing and improving the Work, but excluding communication that is
+conspicuously marked or otherwise designated in writing by You as "Not a
+Contribution."
 
-## 2. Copyright and database license
+## 2. Grant of Copyright and Database License
 
-You grant EBP a perpetual, worldwide, non-exclusive, no-charge,
-royalty-free, irrevocable license under copyright, database rights, sui generis
-database rights, and other intellectual-property rights You own, control, or are
+Subject to the terms and conditions of this Agreement, You hereby grant to CSA
+a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+license under copyright, database rights, sui generis database rights, and any
+other intellectual or industrial property rights You own, control, or are
 authorized to license in Your Contribution (other than patents and trademarks,
 which are addressed separately or not at all) to reproduce, prepare derivative
 works of, publicly display, publicly perform, extract, re-utilize, sublicense,
-and distribute the Contribution and derivative works.
+and distribute Your Contributions and such derivative works.
 
-EBP may exercise these rights itself or sublicense them to others,
-including under the license applicable to the covered project. You retain all
-rights not expressly granted here and may use, publish, or relicense your own
-Contribution elsewhere.
+CSA may exercise these rights itself and may license or sublicense them to
+others on terms of CSA's choosing — including the terms under which CSA
+publishes the Work (for example, the license in the project's `LICENSE.txt`).
+This Agreement grants no rights directly to recipients of materials distributed
+by CSA; such recipients receive only the rights CSA grants them under the
+applicable outbound license.
 
-## 2A. Moral rights
+## 2A. Moral Rights
 
 To the fullest extent permitted under applicable law, You waive, and agree not
 to assert, any "moral rights" (including rights of attribution and integrity)
-in Your Contributions against EBP, its sublicensees, or recipients of covered
-projects. Where and to the extent such a waiver is not permitted by applicable
-law, You consent to EBP's use, modification, publication, and distribution of
-Your Contributions with or without attribution.
+in Your Contributions against CSA, its sublicensees, or recipients of
+materials distributed by CSA. Where and to the extent such a waiver is not
+permitted by applicable law, You consent to CSA's use, modification,
+publication, and distribution of Your Contributions with or without
+attribution.
 
-## 3. Patent license
+## 3. Grant of Patent License
 
-You grant EBP a perpetual, worldwide, non-exclusive, no-charge,
-royalty-free, irrevocable (except as stated in this section) patent license,
-which EBP may sublicense to recipients of the covered project, to make, have
-made, use, offer to sell, sell, import, and otherwise transfer the covered
-project, but only for patent claims licensable by You that are necessarily
-infringed by Your Contribution alone or in combination with the project. If
-any entity institutes patent litigation against You or any other entity
-(including a cross-claim or counterclaim) alleging that Your Contribution or
-the covered project infringes a patent, any patent licenses granted to that
-entity under this Agreement for that Contribution or project terminate as of
-the date the litigation is filed.
+Subject to the terms and conditions of this Agreement, You hereby grant to CSA
+a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+(except as stated in this section) patent license — which CSA may sublicense to
+recipients and users of the Work, including in connection with CSA's products
+and services — to make, have made, use,
+offer to sell, sell, import, and otherwise transfer the Work, where such license
+applies only to those patent claims licensable by You that are necessarily
+infringed by Your Contribution(s) alone or by combination of Your
+Contribution(s) with the Work to which such Contribution(s) was submitted. If any entity institutes patent
+litigation against You or any other entity (including a cross-claim or
+counterclaim in a lawsuit) alleging that Your Contribution, or the Work to
+which You have contributed, constitutes direct or contributory patent
+infringement, then any patent licenses granted to that entity under this
+Agreement for that Contribution or Work shall terminate as of the date such
+litigation is filed.
 
 ## 4. Representations
 
-You represent that You are legally entitled to grant these rights, that Your
-Contribution is Your original creation or is clearly identified as submitted
-on behalf of a third party with its license terms, and that You have disclosed
-known third-party restrictions. If an employer or other organization owns the
-Contribution, You represent that You have its authorization to make the
-Contribution and grant these rights.
+You represent that You are legally entitled to grant the above licenses, and
+that no other person or entity holds rights in Your Contributions that would
+prevent this grant. If Your employer(s) or any other party has rights to
+intellectual property that You create that includes Your Contributions, You
+represent that You have obtained the necessary permission to make the
+Contributions and to grant the licenses in this Agreement, or that such rights
+have been waived in respect of Your Contributions to CSA.
 
-## 5. No warranty and notification
+You represent that each of Your Contributions is Your original creation (see
+section 7 for submissions on behalf of others). You represent that Your
+Contribution submissions include complete details of any third-party license
+or other restriction (including, but not limited to, related patents and
+trademarks) of which You are personally aware and which are associated with
+any part of Your Contributions.
+
+## 5. No Warranty
 
 You are not expected to provide support for Your Contributions, except to the
 extent You desire to provide support. You may provide support for free, for a
@@ -77,51 +124,73 @@ CONDITIONS OF ANY KIND, either express or implied, including, without
 limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT,
 MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE.
 
-You agree to notify EBP of facts that would make these representations
-inaccurate.
+## 6. Notification
 
-## 6. Electronic execution and acceptance
+You agree to notify CSA of any facts or circumstances of which You become
+aware that would make these representations inaccurate in any respect.
 
-You offer to enter this Agreement by opening a signature pull request against
-the central `conveyal/CLA-Ledger` repository that adds a record under
-`signatures/` from the GitHub account named in that record. The Agreement
-becomes effective only when authorized Conveyal maintainers accept the offer
-on behalf of EBP by merging the record. Before then, You may withdraw the offer
-by closing the pull request, and EBP may decline it at its discretion.
+## 7. Submissions on Behalf of Others
 
-You represent that You are the individual who controls the GitHub account that
-opens the signature pull request, that the login and numeric identifier in the
-record are those of that account, and that You are of legal age to form a
-binding contract. The GitHub numeric account ID is the identity of record; the
-signature and grant survive account renaming, transfer, or deletion.
+Should You wish to submit work that is not Your original creation, You may
+submit it to CSA separately from any Contribution, identifying the complete
+details of its source and of any license or other restriction (including, but
+not limited to, related patents, trademarks, and license agreements) of which
+You are personally aware, and conspicuously marking the work as "Submitted on
+behalf of a third-party: [named here]".
 
-## 7. Scope and versions
+## 8. Execution and Identity
 
-This Agreement covers present and future Contributions to all covered projects.
-One accepted signature per Agreement version covers all covered projects;
-no separate repository signatures are required. Workflow and refresh
-enrollment do not limit coverage.
+This Agreement is executed electronically, in GitHub. You offer Your signature
+by opening a pull request to the CSA CLA-Ledger repository, in this project's
+directory, that adds a signature file named for Your GitHub numeric account
+identifier (`security-controls-catalog/signatures/<id>.md`) containing **the
+full text of this Agreement** together with Your statement of agreement — Your
+GitHub login, Your numeric account identifier, the version of this Agreement,
+and the date. Opening that pull request from Your GitHub account is Your
+signature on this Agreement and Your **offer** to be bound by it, on the version
+You embed.
 
-This Agreement does not cover unrelated EBP projects outside that organization.
-It is forward-looking and does not re-bind historical contributions.
-Material changes receive a new version and require a new record for future
-Contributions; prior records and grants remain effective under their signed
-version.
+This Agreement has no binding effect unless and until CSA **accepts** Your offer
+by **merging that pull request** into the CLA-Ledger; it becomes effective upon
+that merge. Before then, Your offer is not an effective agreement: You may
+withdraw it by closing the pull request, and CSA may decline to accept it at its
+discretion.
 
-## 8. Governing law
+You represent and agree that: (a) You are the individual who controls the
+GitHub account that opens the signature pull request, and that account's
+numeric identifier is the identity of record for this Agreement (GitHub logins
+can change; the numeric identifier does not); (b) the login and numeric
+identifier You state in the signature file are those of that account; (c) the
+rights and licenses granted in this Agreement survive any deactivation,
+deletion, renaming, or transfer of Your GitHub account; and (d) You are of
+legal age to form a binding contract.
+
+CSA validates each signature against the **authenticated account that opens the
+signature pull request**: the file name and the login and numeric identifier
+stated in the file must match that account, and the embedded Agreement text
+must match the published version. The signature identity CSA requires is Your
+GitHub login and numeric account identifier — not Your legal name, email, or
+employer — and the signature file states only those, the version of this
+Agreement, and the date. Git separately records, in the public repository
+history, the author name and email Your own git is configured with for the commit
+that adds or updates Your signature file (CSA neither requires nor relies on this
+metadata), and GitHub records the associated pull request metadata, as described
+in the
+[Privacy Notice](https://github.com/CloudSecurityAlliance/CLA-Ledger/blob/main/PRIVACY.md).
+
+## 9. Governing Law
 
 This Agreement is governed by and construed in accordance with the laws of the
-Commonwealth of Massachusetts, USA, excluding its conflict-of-law provisions.
-The parties consent to the exclusive jurisdiction and venue of the state courts
-of the Commonwealth of Massachusetts and the United States District Court for
-the District of Massachusetts for any dispute arising out of or relating to this
-Agreement.
+State of Nevada, USA, excluding its conflict-of-law provisions. The parties
+consent to the exclusive jurisdiction and venue of the state courts of the
+State of Nevada and the United States District Court for the District of Nevada
+for any dispute arising out of or relating to this Agreement.
 
-## 9. Entire agreement; no limitation of existing rights
+## 10. Entire Agreement; No Limitation of Existing Rights
 
 This Agreement constitutes the entire agreement between the parties concerning
 the subject matter hereof. Nothing in this Agreement supersedes, limits, or
-diminishes any right EBP already holds by operation of law or under any
+diminishes any right CSA already holds by operation of law or under any
 employment agreement, contractor agreement, or other written agreement,
-including without limitation EBP's ownership of works made for hire. This
+including without limitation CSA's ownership of works made for hire. This
 Agreement supplements, and does not replace, such rights.
