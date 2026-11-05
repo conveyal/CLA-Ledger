@@ -12,12 +12,10 @@ validated separately so contributors can sign without first being covered.
 
 Coverage is keyed by numeric GitHub account ID because usernames can change.
 Bot accounts are exempt; unknown or unmapped human commit authors fail closed.
-The public record is intentionally minimal and corporate authorization records
-contain only organization and GitHub account metadata.
+The public record is intentionally minimal and contains only GitHub account
+metadata.
 
-Record paths include the signed CLA version. Corporate authorizations append
-numbered snapshots; coverage uses the newest snapshot for each organization
-and version. Validation accepts additions only and rejects changes to existing
+Record paths include the signed CLA version. Validation accepts additions only and rejects changes to existing
 records, including renames out of the signature directory.
 
 PR file and commit lists must match the counts in GitHub's PR metadata. The
@@ -31,7 +29,10 @@ They use trusted caller-base and pinned implementation checkouts. Checkout
 failures complete the prepared check as failure; per-PR concurrency cancels
 superseded evaluations.
 
-Personalized editor links reproduce the complete agreement and record template
+Records identify the agreement by link, version, and SHA-256 hash; `versions/`
+stays frozen once signed, so the hash proves which text was accepted.
+
+Personalized editor links reproduce the record template
 for each uncovered account. They do not submit a signature or establish identity.
 The PR opener still supplies authentication. A conservative URL budget and a
 comment-size budget retain manual instructions when a full link cannot fit.

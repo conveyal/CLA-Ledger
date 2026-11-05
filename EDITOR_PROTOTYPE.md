@@ -8,7 +8,7 @@ accepted signatures in the public Conveyal ledger.
 
 ## Current state
 
-- The agreement is `v0.1`. Tooling release
+- The current ledger agreement is `v1.0`. Tooling release
   [v0.0.1](https://github.com/conveyal/CLA-Ledger/releases/tag/v0.0.1)
   is published and immutable. The fixture workflows now use that release.
 - `sign.ts --editor-url` generates a URL without creating a local record.
@@ -42,6 +42,10 @@ entire agreement; shortening only the test notice fixed that observed failure.
 This is evidence of a URL-size constraint in this flow, not a documented
 universal limit. Future agreement changes must repeat the browser test.
 
+Records now identify the agreement by link and SHA-256 hash instead of embedding
+its text, so link size no longer depends on agreement length. The evidence above
+predates this format; repeat the browser test before rollout.
+
 GitHub documents its automatic fork-and-propose workflow in
 [Creating new files](https://docs.github.com/en/repositories/working-with-files/managing-files/creating-new-files).
 The `filename` and `value` URL parameters are experimental here; passing the
@@ -52,25 +56,24 @@ browser test is required before relying on them for contributor onboarding.
 From a checkout with the desired ledger configuration and canonical text:
 
 ```sh
-node /path/to/CLA-Ledger/sign.ts trevorgerhardt --id 776780 --individual --editor-url
+node /path/to/CLA-Ledger/sign.ts trevorgerhardt --id 776780 --editor-url
 ```
 
 The current directory supplies `cla/config.json` and `versions/`. In the test
 repository, these point to the disposable fixture. In the real ledger, they
 point to the real agreement. Never generate a real signing link for a test.
 
-The CLI supports individual records only for this option. It refuses a link
-when the selected version already has a record for that ID. Opening the URL
-does not create a branch, commit, or PR; the contributor performs those actions.
+The CLI refuses a link when the selected version already has a record for that
+ID. Opening the URL does not create a branch, commit, or PR; the contributor
+performs those actions.
 
 ## Browser acceptance test
 
 1. Sign in as the account named in the test repository's link.
 2. Open its **Open the prefilled test file** link.
-3. Verify the filename is `signatures/v0.1/individual/<account-id>.md`.
-4. Verify the editor includes the test-only notice, the entire agreement, and
-   the signature block. The test fixture also contains Unicode and literal
-   `+`, `&`, `#`, and `%` characters to detect encoding problems.
+3. Verify the filename is `signatures/<fixture-version>/individual/<account-id>.md`, using the test repository's `versions/CURRENT` value.
+4. Verify the editor includes the signature block, the agreement link, and the
+   agreement's SHA-256 hash.
 5. Select **Commit changes**, choose a new branch, and open a pull request.
    Accounts with write access must choose a new branch instead of committing
    directly to `main`.

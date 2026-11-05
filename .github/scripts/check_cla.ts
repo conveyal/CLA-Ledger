@@ -104,7 +104,7 @@ async function main() {
       lines.push("", "Missing or stale records:");
       lines.push(...signingLines(root, version, authors, Math.max(0, COMMENT_BUDGET - lines.join("\n").length - reserved - 1000)));
       if (process.env.EDITOR_LINKS === "true") {
-        lines.push("", "Open your signing link, review the complete agreement, then commit on a new branch and create the signature PR using your own GitHub account. A maintainer must merge it before coverage is accepted.");
+        lines.push("", "Read the agreement linked above, open your signing link, then commit on a new branch and create the signature PR using your own GitHub account. A maintainer must merge it before coverage is accepted.");
       }
     }
     const body = lines.join("\n");

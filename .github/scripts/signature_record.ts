@@ -4,7 +4,7 @@
  * A generated link only prepares a proposal; PR-opener validation and maintainer merge establish acceptance.
  */
 
-import { recordLink, validDate, type ClaConfig } from "./cla.ts";
+import { agreementHash, recordLink, validDate, type ClaConfig } from "./cla.ts";
 
 /** Record contents and its append-only path relative to the configured ledger root. */
 interface IndividualRecord {
@@ -13,12 +13,12 @@ interface IndividualRecord {
 }
 
 /** Render the signature block shared by the CLI and editor-link generator. */
-function buildIndividual(config: ClaConfig, login: string, id: string, version: string, date: string) {
+function buildIndividual(config: ClaConfig, agreement: string, login: string, id: string, version: string, date: string) {
   const link = recordLink(config, version);
-  return `---\n\n## Signature\n\nI, @${login} (GitHub account ID: ${id}), agree to and sign the\n[Conveyal Contributor License Agreement, version ${version.slice(1)}](${link})\n— reproduced in full above — for Conveyal's organization-wide open-source projects.\n\n- GitHub login: ${login}\n- GitHub account ID: ${id}\n- CLA version: ${version}\n- Signature type: individual\n- Date: ${date}\n`;
+  return `## Signature\n\nI, @${login} (GitHub account ID: ${id}), have read, agree to, and sign the\n[Conveyal Contributor License Agreement, version ${version.slice(1)}](${link})\nfor public repositories in the Conveyal GitHub organization.\n\n- GitHub login: ${login}\n- GitHub account ID: ${id}\n- CLA version: ${version}\n- Agreement SHA-256: ${agreementHash(agreement)}\n- Signature type: individual\n- Date: ${date}\n`;
 }
 
-/** Require literal identity fields and preserve the canonical agreement's internal whitespace. */
+/** Require literal identity fields and identify the agreement by link, version, and hash. */
 function individualRecord(config: ClaConfig, agreement: string, login: string, id: string, version: string, date: string): IndividualRecord {
   if (!/^[a-z\d](?:[a-z\d-]{0,37}[a-z\d])?$/i.test(login)) throw new Error("invalid GitHub login");
   if (!/^[1-9]\d*$/.test(id)) throw new Error("invalid GitHub account ID");
@@ -27,7 +27,7 @@ function individualRecord(config: ClaConfig, agreement: string, login: string, i
   if (!agreement.trim()) throw new Error("canonical agreement is empty");
   return {
     path: `signatures/${version}/individual/${id}.md`,
-    text: `${agreement.trimEnd()}\n\n${buildIndividual(config, login, id, version, date)}`,
+    text: buildIndividual(config, agreement, login, id, version, date),
   };
 }
 
@@ -50,4 +50,4 @@ function individualEditorUrl(config: ClaConfig, record: IndividualRecord): strin
   return location.href;
 }
 
-export { buildIndividual, individualRecord, individualEditorUrl, type IndividualRecord };
+export { individualRecord, individualEditorUrl, type IndividualRecord };

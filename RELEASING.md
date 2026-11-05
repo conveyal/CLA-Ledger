@@ -121,7 +121,7 @@ with:
 
 This excerpt shows the fields to update. Preserve the caller's other inputs,
 permissions, and PR trigger. Use [SETUP_PROJECT.md](SETUP_PROJECT.md) for the
-complete R5 workflow and rollout checks.
+complete caller workflow and rollout checks.
 
 Ledger data continues to follow `main`. Newly accepted signatures supply
 coverage without a tooling release. Consumer implementation upgrades remain
