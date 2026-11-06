@@ -129,6 +129,7 @@ Verify these results in the **CLA** workflow:
 | One human author has no record or only an older-version record | Fail, with a signing link in the PR comment |
 | Multiple human authors, including one without coverage | Fail, even if the PR opener has coverage |
 | GitHub identifies the author as type `Bot` | Exempt that author; still check other authors |
+| The author's account ID is in the ledger's `cla/exempt.json` | Exempt that author; still check other authors |
 | GitHub cannot map a human commit author to an account | Fail and identify the unmapped commit |
 
 For the uncovered contributor test, merge that contributor's valid signature in the central ledger.

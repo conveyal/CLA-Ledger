@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Enforce current CLA coverage for every human commit author on a pull request.
- * Read records from the trusted ledger checkout and PR metadata from GitHub.
+ * Read records and exempt accounts from the trusted ledger checkout and PR metadata from GitHub.
  * Missing identities, incomplete responses, and changing revisions prevent success.
  * Signature-only PRs use the separate signature validator when explicitly enabled.
  */
@@ -69,11 +69,13 @@ async function main() {
 
   const version = helpers.currentVersion(root);
   const covered = helpers.records(root, version);
+  const exempt = helpers.exemptAccounts(root);
   // Account IDs remain stable when logins change and deduplicate authors across commits.
   const missing = new Map<string, MissingAuthor>();
   // Keep unmapped commits separate: no ledger lookup can establish coverage for an unknown identity.
   const unknown = new Set<string>();
   const bots = new Set<string>();
+  const exempted = new Set<string>();
   const commits = await helpers.completePullRequestList(repo, pr, snapshot, "commits");
   for (const commit of commits) {
     const author = commit.author;
@@ -81,6 +83,8 @@ async function main() {
       bots.add(author.login || "unknown bot");
     } else if (!author || author.id === undefined || author.id === null) {
       unknown.add(String(commit.sha || "unknown").slice(0, 12));
+    } else if (exempt.has(String(author.id))) {
+      exempted.add(author.login || String(author.id));
     } else if (!covered.has(String(author.id))) {
       missing.set(String(author.id), { login: author.login || null, id: String(author.id) });
     }
@@ -114,7 +118,7 @@ async function main() {
   }
   await helpers.assertPullRequestUnchanged(repo, pr, snapshot);
   await helpers.updateComment(repo, pr, `All human commit authors are covered by Conveyal CLA \`${version}\`.`, false);
-  console.log(`CLA check passed; exempt bots: ${[...bots].sort().join(", ") || "none"}.`);
+  console.log(`CLA check passed; exempt bots: ${[...bots].sort().join(", ") || "none"}; exempt accounts: ${[...exempted].sort().join(", ") || "none"}.`);
   return 0;
 }
 
