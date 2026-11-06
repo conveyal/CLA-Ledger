@@ -11,7 +11,8 @@ code in one change. Signature-only pull requests against the ledger are
 validated separately so contributors can sign without first being covered.
 
 Coverage is keyed by numeric GitHub account ID because usernames can change.
-Bot accounts are exempt; unknown or unmapped human commit authors fail closed.
+Bot accounts and accounts listed in `cla/exempt.json` on the trusted base are
+exempt; unknown or unmapped human commit authors fail closed.
 The public record is intentionally minimal and contains only GitHub account
 metadata.
 

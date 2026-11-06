@@ -25,6 +25,9 @@
   `--organization`, or `--authorized-id`, and validation rejects corporate paths.
 - Signature records now link to the agreement and state its SHA-256 hash instead
   of embedding its text, which keeps signing links short at any agreement length.
+- Added `cla/exempt.json`, read from the trusted base branch. Listed accounts,
+  initially EBP US Inc. employees, need no signature record. A malformed list
+  fails the check closed.
 
 ## v0.0.1 — 2026-10-08
 

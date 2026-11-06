@@ -44,7 +44,8 @@ pull requests and pushes to `main`. It sets up pnpm and Node.js from
   publish legal names, emails, or addresses.
 - Records are append-only under `signatures/<version>/individual/<account-id>.md`.
 - The contribution check reads only records already present on the trusted base
-  branch and exempts GitHub accounts whose API type is `Bot`.
+  branch and exempts GitHub accounts whose API type is `Bot` and accounts listed
+  in `cla/exempt.json`.
 - CLA v1.0 is complete. A material revision gets a new
   immutable version and does not rewrite historical signatures.
 
