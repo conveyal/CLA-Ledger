@@ -227,11 +227,39 @@ function agreementHash(agreement: string): string {
   return createHash("sha256").update(agreement, "utf8").digest("hex");
 }
 
+/** Locates a ledger data file in the ledger root or its cla/ subdirectory. */
+function ledgerFile(root: string, name: string): string {
+  const direct = path.join(root, name);
+  return fs.existsSync(direct) ? direct : path.join(root, "cla", name);
+}
+
 /** Reads configuration from the ledger root or its cla/ subdirectory. */
 function loadConfig(root: string): ClaConfig {
-  const direct = path.join(root, "config.json");
-  const file = fs.existsSync(direct) ? direct : path.join(root, "cla", "config.json");
+  const file = ledgerFile(root, "config.json");
   return parseConfig(JSON.parse(fs.readFileSync(file, "utf8")), file);
+}
+
+/**
+ * Returns GitHub account IDs that need no CLA record, such as EBP employees.
+ * The caller supplies a trusted checkout. A missing file exempts no one; a malformed file throws so the check fails closed.
+ */
+function exemptAccounts(root: string): Set<string> {
+  const file = ledgerFile(root, "exempt.json");
+  if (!fs.existsSync(file)) return new Set();
+  const value: unknown = JSON.parse(fs.readFileSync(file, "utf8"));
+  if (!Array.isArray(value)) throw new Error(`${file} must contain an array`);
+  const ids = new Set<string>();
+  for (const entry of value) {
+    if (!isObject(entry) || !Number.isSafeInteger(entry.id) || Number(entry.id) <= 0
+      || typeof entry.login !== "string" || !entry.login
+      || typeof entry.reason !== "string" || !entry.reason) {
+      throw new Error(`${file} entries must define a positive integer id and nonempty login and reason`);
+    }
+    const id = String(entry.id);
+    if (ids.has(id)) throw new Error(`${file} lists account ${id} more than once`);
+    ids.add(id);
+  }
+  return ids;
 }
 
 /** Requires the configuration fields used by signing and coverage, retaining extra fields. */
@@ -335,6 +363,7 @@ export {
   canonical,
   agreementHash,
   loadConfig,
+  exemptAccounts,
   records,
   recordLink,
   parseIndividualRecord,

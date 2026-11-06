@@ -10,4 +10,5 @@ it has been signed.
 
 Signature workflows must validate PR content through the API while checking out
 only trusted base-branch code. Contribution checks must inspect commit authors,
-exempt GitHub `Bot` accounts, and fail closed for unknown human authors.
+exempt GitHub `Bot` accounts and accounts listed in `cla/exempt.json` on the
+trusted base, and fail closed for unknown human authors.
