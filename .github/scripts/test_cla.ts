@@ -431,6 +431,35 @@ test("bot authors are exempt while uncovered humans and unmapped authors fail", 
   assert.doesNotMatch(comment.body, /dependabot/);
 });
 
+test("exempt accounts need no record while other uncovered humans still fail", async (t) => {
+  const root = fixture();
+  sandbox(t, root);
+  write(root, "cla/exempt.json", JSON.stringify([{ id: 2, login: "employee", reason: "EBP US Inc. employee" }]));
+  const files = [{ filename: "src/main.java", status: "modified" }];
+  const employee = { sha: "employee-sha", author: { login: "employee", id: 2, type: "User" } };
+  await t.test("exempt only", async (t) => {
+    mockPR(t, { files, commits: [employee] });
+    assert.equal(await check.main(), 0);
+  });
+  await t.test("exempt and uncovered", async (t) => {
+    const { requests } = mockPR(t, { files, commits: [employee, { sha: "human-sha", author: { login: "octocat", id: 1, type: "User" } }] });
+    assert.equal(await check.main(), 1);
+    const comment = requests.find((item) => item.method === "POST");
+    assert.ok(comment && typeof comment.body === "string");
+    assert.match(comment.body, /octocat/);
+    assert.doesNotMatch(comment.body, /employee/);
+  });
+});
+
+test("malformed exempt lists fail closed", () => {
+  const root = fixture();
+  for (const value of [{}, [{ id: "2", login: "employee", reason: "x" }], [{ id: 2, login: "", reason: "x" }],
+    [{ id: 2, login: "a", reason: "x" }, { id: 2, login: "b", reason: "x" }]]) {
+    write(root, "cla/exempt.json", JSON.stringify(value));
+    assert.throws(() => helpers.exemptAccounts(root), /exempt\.json/);
+  }
+});
+
 test("complete 250-commit PRs pass, including authors on the final page", async (t) => {
   const root = fixture();
   sandbox(t, root);

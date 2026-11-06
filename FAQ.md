@@ -37,6 +37,11 @@ section 4 of the CLA. The public record does not collect employer documents.
 GitHub accounts whose API type is `Bot` are exempt because they cannot execute a
 legal signature. Human authors remain responsible for their work.
 
+### Do EBP employees sign?
+
+No. Their employment agreements cover work they do for EBP US Inc. Employees
+are listed by GitHub account ID in `cla/exempt.json` instead. See [GOVERNANCE.md](GOVERNANCE.md#exempt-accounts).
+
 ### What if the CLA changes?
 
 The current version is shown in `versions/CURRENT`. See

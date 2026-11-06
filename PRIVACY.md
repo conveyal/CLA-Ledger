@@ -4,6 +4,9 @@ The public CLA-Ledger stores only data needed to identify coverage: GitHub login
 immutable numeric account ID, CLA version, and date. It must not store legal names, email addresses, mailing addresses, or private
 employer documents.
 
+`cla/exempt.json` publishes the GitHub login, numeric account ID, and EBP
+employment relationship of each exempt account.
+
 GitHub and git may separately expose commit metadata and pull-request metadata.
 Contributors who do not want a personal email in public git history should use
 a chosen commit name and a GitHub noreply address.
