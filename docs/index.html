@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign the Conveyal CLA</title>
+</head>
+<body>
+<h1>Sign the Conveyal CLA</h1>
+<p>Read the <a href="https://github.com/conveyal/CLA-Ledger/blob/main/CLA.md">Conveyal Contributor License Agreement</a> before you sign.</p>
+<form id="form">
+<label>GitHub login <input name="login" required autocomplete="username"></label>
+<button>Prepare signature</button>
+</form>
+<p id="status"></p>
+<pre id="record" hidden></pre>
+<p><a id="link" hidden>Open in GitHub to commit the record and open a pull request</a></p>
+<p>Sign in to GitHub as the account named in the record. A maintainer must merge the pull request before your signature is accepted. See the <a href="https://github.com/conveyal/CLA-Ledger#sign-the-cla">signing instructions</a>.</p>
+<script type="module" src="sign.js"></script>
+</body>
+</html>
