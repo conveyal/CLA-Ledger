@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.0.0 - 2026-11-10
 
 - Finalized the unsigned pre-release agreement as `v1.0` and removed draft labels.
 - Updated canonical paths, signing instructions, and test fixtures for `v1.0`.
