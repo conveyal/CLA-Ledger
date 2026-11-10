@@ -24,6 +24,9 @@ identifies your account as a bot, or if your account is in
 1. Read the [agreement](CLA.md). If your employer can own your work, make sure
    that you have its authorization. See section 4 of the agreement.
 2. Make your signature record. Use one of these methods:
+   - **From the signing page:** Open <https://conveyal.github.io/CLA-Ledger/>
+     and enter your GitHub login. The page shows your record and a link that
+     opens GitHub's file editor with the record filled in.
    - **From your pull request:** When the CLA check fails on a pull request,
      the check's comment shows a **Sign the CLA** link next to your account.
      Open the link. GitHub opens its file editor with your record filled in.

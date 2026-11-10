@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
     "allowImportingTsExtensions": true,
+    "allowJs": true,
+    "checkJs": true,
     "module": "NodeNext",
     "noEmit": true,
     "strict": true,
     "types": ["node"]
   },
-  "include": ["sign.ts", ".github/scripts/*.ts"]
+  "include": ["sign.ts", ".github/scripts/*.ts", "docs/*.js"]
 }

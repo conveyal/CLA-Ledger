@@ -18,6 +18,7 @@ import * as check from "./check_cla.ts";
 import * as validate from "./validate_signatures.ts";
 import * as sign from "../../sign.ts";
 import { individualRecord, individualEditorUrl } from "./signature_record.ts";
+import * as signingPage from "../../docs/sign.js";
 import * as prepareCheck from "./prepare_check.ts";
 import * as runCheck from "./run_check.ts";
 import * as refreshProjects from "./refresh_projects.ts";
@@ -226,6 +227,15 @@ test("editor links round-trip the canonical record and pass signer validation", 
   assert.equal(url.searchParams.get("value"), prepared.text);
   assert.equal(validate.individualError(prepared.text, agreement, fixtureVersion, "octocat", "1", helpers.recordLink(settings, fixtureVersion)), null);
   assert.notEqual(validate.individualError(prepared.text, agreement, fixtureVersion, "someone-else", "2"), null);
+});
+
+test("signing page builds the same record and editor link as the helper", () => {
+  const settings = helpers.loadConfig(repositoryRoot);
+  const agreement = helpers.canonical(repositoryRoot, fixtureVersion);
+  const expected = individualRecord(settings, agreement, "octocat", "1", fixtureVersion, "2020-01-01");
+  const page = signingPage.individualRecord({ login: "octocat", id: "1", version: fixtureVersion, hash: helpers.agreementHash(agreement), date: "2020-01-01" });
+  assert.deepEqual(page, expected);
+  assert.equal(signingPage.editorUrl(page), individualEditorUrl(settings, expected));
 });
 
 test("editor links preserve nested ledger paths and reject unsafe destinations", () => {
