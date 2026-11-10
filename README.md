@@ -14,6 +14,40 @@ EBP US Inc. is the CLA's legal party and license recipient. The
 [agreement](CLA.md) defines which repositories it covers and how signatures are
 accepted.
 
+## Sign the CLA
+
+You sign once for each CLA version. One accepted signature covers all public
+repositories in the Conveyal GitHub organization. You do not sign if GitHub
+identifies your account as a bot, or if your account is in
+[`cla/exempt.json`](cla/exempt.json). This file lists EBP US Inc. employees.
+
+1. Read the [agreement](CLA.md). If your employer can own your work, make sure
+   that you have its authorization. See section 4 of the agreement.
+2. Make your signature record. Use one of these methods:
+   - **From your pull request:** When the CLA check fails on a pull request,
+     the check's comment shows a **Sign the CLA** link next to your account.
+     Open the link. GitHub opens its file editor with your record filled in.
+   - **From the command line:** Install Node.js 24.2 or later. Clone this
+     repository. In the repository root, run `node sign.ts <your-github-login>`.
+     The helper finds your numeric GitHub account ID and writes the file
+     `signatures/v1.0/individual/<id>.md`. To get a GitHub editor link instead
+     of a file, add `--editor-url`.
+3. Examine the record. The GitHub login and account ID must identify your
+   account. Do not add your name, email address, or postal address.
+4. Commit the record to a new branch. Open a pull request to the `main` branch
+   of this repository from the account that the record identifies. If you do
+   not have write access, GitHub makes a fork for you in the editor. On the
+   command line, push your branch to your fork.
+5. A maintainer reviews the record. Your signature is accepted only when the
+   maintainer merges the pull request.
+
+After the merge, the CLA check on your open contribution pull requests runs
+again automatically. If the check does not run again, ask a maintainer to start
+it. When a new CLA version is published, sign again. Your earlier records stay
+in the ledger.
+
+## Development
+
 The helper and workflow scripts require Node.js 24.2 or newer and use only Node's
 built-in modules. No npm install or TypeScript compiler is required; run them
 directly with `node path/to/script.ts`.
